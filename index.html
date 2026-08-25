@@ -1,0 +1,3135 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <script>
+    if (new URLSearchParams(window.location.search).get("embed") === "1") {
+      document.documentElement.classList.add("is-embedded");
+    }
+  </script>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="酒店AI助手">
+  <meta name="theme-color" content="#f4f7fb">
+  <link rel="apple-touch-icon" href="icon.png">
+  <link rel="icon" href="icon.png">
+  <title>酒店AI助手｜MVP交互原型</title>
+  <style>
+    :root {
+      --canvas: #f4f7fb;
+      --surface: #ffffff;
+      --surface-soft: #f8fafc;
+      --ink: #14243a;
+      --ink-soft: #53647a;
+      --muted: #8794a5;
+      --line: rgba(20, 36, 58, 0.10);
+      --line-strong: rgba(20, 36, 58, 0.16);
+      --navy: #173253;
+      --blue: #356af4;
+      --blue-soft: #edf3ff;
+      --green: #3f8f75;
+      --green-soft: #e8f4ef;
+      --violet: #6d72b8;
+      --violet-soft: #eff0fb;
+      --teal: #438a91;
+      --teal-soft: #eaf5f5;
+      --coral: #c86e63;
+      --coral-soft: #faece9;
+      --shadow: 0 24px 70px rgba(23, 50, 83, 0.18);
+      --card-shadow: 0 10px 28px rgba(23, 50, 83, 0.055);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: #dfe4eb;
+    }
+
+    body {
+      color: var(--ink);
+      -webkit-font-smoothing: antialiased;
+      overscroll-behavior: none;
+    }
+
+    button,
+    input,
+    textarea,
+    select {
+      font: inherit;
+    }
+
+    button,
+    [role="button"] {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    button:focus-visible,
+    input:focus-visible,
+    textarea:focus-visible,
+    select:focus-visible {
+      outline: 2px solid rgba(53, 106, 244, 0.45);
+      outline-offset: 2px;
+    }
+
+    [hidden] { display: none !important; }
+
+    #app {
+      width: 100vw;
+      height: calc(100vh - 76px);
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      background: var(--canvas);
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    html.is-embedded #prototype-tools { display: none !important; }
+
+    html.is-embedded #app {
+      width: 100vw;
+      height: 100vh;
+    }
+
+    .screen {
+      min-height: 0;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      animation: screen-in 180ms ease-out;
+    }
+
+    @keyframes screen-in {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .scroll {
+      min-height: 0;
+      flex: 1;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      scrollbar-width: none;
+      padding-bottom: 24px;
+    }
+
+    .scroll::-webkit-scrollbar { display: none; }
+
+    .page-top {
+      min-height: 64px;
+      padding: 12px 18px 8px;
+      display: grid;
+      grid-template-columns: 44px minmax(0, 1fr) 44px;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(244, 247, 251, 0.92);
+      backdrop-filter: blur(18px);
+    }
+
+    .page-top h1 {
+      margin: 0;
+      overflow: hidden;
+      font-size: 17px;
+      font-weight: 760;
+      line-height: 1.2;
+      text-align: center;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .icon-btn {
+      width: 44px;
+      height: 44px;
+      padding: 0;
+      display: grid;
+      place-items: center;
+      border: 0;
+      border-radius: 14px;
+      color: var(--ink);
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .icon-btn:active { background: rgba(20, 36, 58, 0.06); }
+
+    .arrow-left {
+      width: 10px;
+      height: 10px;
+      border-left: 1.8px solid currentColor;
+      border-bottom: 1.8px solid currentColor;
+      transform: rotate(45deg);
+    }
+
+    .close-x {
+      width: 16px;
+      height: 16px;
+      position: relative;
+    }
+
+    .close-x::before,
+    .close-x::after {
+      content: "";
+      width: 17px;
+      height: 1.6px;
+      position: absolute;
+      left: 0;
+      top: 7px;
+      border-radius: 99px;
+      background: currentColor;
+    }
+
+    .close-x::before { transform: rotate(45deg); }
+    .close-x::after { transform: rotate(-45deg); }
+
+    .home-head {
+      padding: 17px 18px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .hotel-switcher {
+      min-width: 0;
+      min-height: 52px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      border: 0;
+      color: inherit;
+      background: transparent;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .hotel-mark {
+      width: 46px;
+      height: 46px;
+      flex: 0 0 auto;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      border: 1px solid rgba(53, 106, 244, 0.22);
+      border-radius: 15px;
+      color: #eaf0ff;
+      background: var(--navy);
+      box-shadow: 0 8px 18px rgba(23, 50, 83, 0.14);
+      font-family: Georgia, "Songti SC", serif;
+      font-size: 16px;
+      font-weight: 650;
+    }
+
+    .hotel-mark img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .hotel-copy {
+      min-width: 0;
+    }
+
+    .hotel-title {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .hotel-title strong {
+      max-width: 206px;
+      overflow: hidden;
+      font-size: 18px;
+      font-weight: 780;
+      letter-spacing: -0.035em;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .chevron {
+      width: 7px;
+      height: 7px;
+      flex: 0 0 auto;
+      border-right: 1.5px solid var(--ink-soft);
+      border-bottom: 1.5px solid var(--ink-soft);
+      transform: rotate(45deg) translateY(-2px);
+    }
+
+    .hotel-copy small {
+      display: block;
+      margin-top: 5px;
+      overflow: hidden;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.2;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .brand-chip {
+      min-width: 44px;
+      height: 30px;
+      padding: 0 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(53, 106, 244, 0.15);
+      border-radius: 999px;
+      color: var(--blue);
+      background: var(--blue-soft);
+      font-size: 10px;
+      font-weight: 760;
+      letter-spacing: 0.02em;
+    }
+
+    .content {
+      padding: 7px 18px 28px;
+    }
+
+    .section + .section { margin-top: 27px; }
+
+    .section-title {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .section-title h2 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 780;
+      letter-spacing: -0.03em;
+    }
+
+    .section-title p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.45;
+    }
+
+    .count {
+      color: var(--muted);
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    .app-list {
+      display: grid;
+      gap: 11px;
+    }
+
+    .app-card {
+      --accent: var(--blue);
+      --soft: var(--blue-soft);
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: var(--surface);
+      box-shadow: var(--card-shadow);
+    }
+
+    .app-card-head {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+    }
+
+    .app-icon {
+      width: 42px;
+      height: 42px;
+      flex: 0 0 auto;
+      display: grid;
+      place-items: center;
+      border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
+      border-radius: 13px;
+      color: var(--accent);
+      background: var(--soft);
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .app-name {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .app-name strong {
+      display: block;
+      font-size: 15px;
+      font-weight: 780;
+    }
+
+    .app-name span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    .status-pill {
+      min-height: 25px;
+      padding: 0 8px;
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      color: var(--accent);
+      background: var(--soft);
+      font-size: 9px;
+      font-weight: 760;
+      white-space: nowrap;
+    }
+
+    .task-row {
+      width: 100%;
+      min-height: 44px;
+      margin-top: 14px;
+      padding: 10px 11px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      border: 1px solid color-mix(in srgb, var(--accent) 18%, transparent);
+      border-radius: 13px;
+      color: var(--ink);
+      background: color-mix(in srgb, var(--soft) 65%, white);
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .task-dot {
+      width: 7px;
+      height: 7px;
+      flex: 0 0 auto;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 12%, transparent);
+    }
+
+    .task-row span:nth-child(2) {
+      min-width: 0;
+      flex: 1;
+      overflow: hidden;
+      font-size: 12px;
+      font-weight: 680;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .mini-arrow {
+      width: 7px;
+      height: 7px;
+      flex: 0 0 auto;
+      border-right: 1.4px solid var(--muted);
+      border-top: 1.4px solid var(--muted);
+      transform: rotate(45deg);
+    }
+
+    .card-footer {
+      margin-top: 13px;
+      padding-top: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      border-top: 1px solid var(--line);
+    }
+
+    .message-btn {
+      min-width: 0;
+      min-height: 40px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      border: 0;
+      color: var(--muted);
+      background: transparent;
+      font-size: 10px;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .message-btn span:last-child {
+      max-width: 150px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .unread-dot {
+      width: 6px;
+      height: 6px;
+      flex: 0 0 auto;
+      border-radius: 50%;
+      background: #c96d61;
+    }
+
+    .primary-small {
+      min-width: 92px;
+      min-height: 40px;
+      padding: 0 13px;
+      border: 0;
+      border-radius: 12px;
+      color: #fff;
+      background: var(--accent);
+      font-size: 11px;
+      font-weight: 760;
+      cursor: pointer;
+      box-shadow: 0 8px 18px color-mix(in srgb, var(--accent) 22%, transparent);
+    }
+
+    .primary-small:active,
+    .primary-btn:active { transform: scale(0.98); }
+
+    .locked-card {
+      width: 100%;
+      min-height: 74px;
+      padding: 12px 13px;
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      border: 1px solid var(--line);
+      border-radius: 17px;
+      color: inherit;
+      background: rgba(255, 255, 255, 0.72);
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .locked-card .app-icon {
+      width: 38px;
+      height: 38px;
+      border-color: var(--line);
+      color: var(--ink-soft);
+      background: var(--surface-soft);
+    }
+
+    .locked-copy {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .locked-copy strong {
+      display: block;
+      font-size: 13px;
+      font-weight: 740;
+    }
+
+    .locked-copy span {
+      display: block;
+      margin-top: 5px;
+      overflow: hidden;
+      color: var(--muted);
+      font-size: 10px;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .locked-label {
+      color: var(--muted);
+      font-size: 9px;
+      white-space: nowrap;
+    }
+
+    .bottom-nav {
+      min-height: 66px;
+      padding: 7px 48px calc(7px + env(safe-area-inset-bottom));
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      border-top: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(18px);
+    }
+
+    .home-screen {
+      --home-bg: #f5f4f1;
+      --home-ink: #172033;
+      --home-muted: #81889a;
+      background: var(--home-bg);
+      color: var(--home-ink);
+    }
+
+    .home-screen .scroll {
+      background:
+        radial-gradient(circle at 8% 0%, rgba(220, 231, 251, 0.46), transparent 24%),
+        var(--home-bg);
+    }
+
+    .home-screen .home-head {
+      min-height: 48px;
+      padding: 12px 20px 3px;
+      display: block;
+      border-bottom: 0;
+      background: transparent;
+      backdrop-filter: none;
+    }
+
+    .home-screen .hotel-switcher {
+      min-height: 32px;
+      gap: 9px;
+    }
+
+    .home-screen .hotel-mark {
+      width: 20px;
+      height: 20px;
+      border: 0;
+      border-radius: 6px;
+      color: #fff;
+      background: #102a63;
+      box-shadow: none;
+      font-size: 8px;
+    }
+
+    .home-screen .hotel-title strong {
+      max-width: 180px;
+      font-size: 12px;
+      font-weight: 740;
+    }
+
+    .home-screen .hotel-copy small,
+    .home-screen .brand-chip {
+      display: none;
+    }
+
+    .home-hero {
+      min-height: 76px;
+      padding: 10px 20px 12px;
+      display: flex;
+      align-items: center;
+    }
+
+    .home-hero h1 {
+      margin: 0;
+      color: var(--home-ink);
+      font-size: 24px;
+      font-weight: 790;
+      letter-spacing: -0.055em;
+      line-height: 1.12;
+    }
+
+    .home-screen .content {
+      padding: 0 20px 24px;
+    }
+
+    .home-screen .section + .section {
+      margin-top: 23px;
+    }
+
+    .home-screen .section-title {
+      margin-bottom: 9px;
+    }
+
+    .home-screen .section-title h2 {
+      font-size: 18px;
+      font-weight: 780;
+      letter-spacing: -0.035em;
+    }
+
+    .home-screen .section-title p,
+    .home-screen .section-title .count {
+      display: none;
+    }
+
+    #prototype-tools {
+      display: block;
+      width: 100%;
+      flex: 0 0 auto;
+      padding: 8px 12px;
+      border: 1px solid rgba(255, 255, 255, 0.82);
+      border-radius: 0 0 18px 18px;
+      background: rgba(255, 255, 255, 0.66);
+      box-shadow: 0 14px 34px rgba(24, 39, 64, 0.08);
+      backdrop-filter: blur(18px);
+    }
+
+    #prototype-tools .demo-state-controls {
+      margin: 0;
+      padding: 8px 9px;
+      border: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    #prototype-tools .demo-state-label {
+      display: block;
+      margin-bottom: 7px;
+      color: #81889a;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    #prototype-tools .demo-state-options {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    #prototype-tools .demo-state-options::-webkit-scrollbar { display: none; }
+
+    #prototype-tools .demo-state-option {
+      min-height: 30px;
+      padding: 0 7px;
+      flex: 0 0 auto;
+      border: 1px solid rgba(23, 50, 83, 0.10);
+      border-radius: 15px;
+      color: #81889a;
+      background: rgba(255, 255, 255, 0.72);
+      font-size: 9px;
+      font-weight: 680;
+      cursor: pointer;
+    }
+
+    #prototype-tools .demo-state-option.active {
+      border-color: rgba(23, 50, 83, 0.16);
+      color: #172033;
+      background: #fff;
+      box-shadow: 0 3px 8px rgba(24, 39, 64, 0.07);
+    }
+
+    #prototype-tools .demo-auth-controls {
+      margin-top: 10px;
+      padding: 14px 9px 8px;
+      border-top: 1px solid rgba(23, 50, 83, 0.08);
+    }
+
+    .home-screen .app-list {
+      gap: 11px;
+    }
+
+    .home-screen .app-card {
+      height: auto;
+      min-height: 0;
+      padding: 15px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.74);
+      border-radius: 22px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.94), color-mix(in srgb, var(--soft) 66%, white));
+      box-shadow: 0 12px 30px rgba(31, 49, 85, 0.07);
+    }
+
+    .home-screen .app-card::after {
+      content: "";
+      width: 100px;
+      height: 100px;
+      position: absolute;
+      right: -38px;
+      top: -45px;
+      border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+      border-radius: 50%;
+      box-shadow: 0 0 0 15px color-mix(in srgb, var(--accent) 5%, transparent), 0 0 0 31px color-mix(in srgb, var(--accent) 3%, transparent);
+      pointer-events: none;
+    }
+
+    .home-screen .app-card-head,
+    .home-screen .app-intro,
+    .home-screen .app-task-line,
+    .home-screen .app-message,
+    .home-screen .card-footer {
+      position: relative;
+      z-index: 1;
+    }
+
+    .home-screen .app-card-head {
+      gap: 10px;
+    }
+
+    .home-screen .app-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 13px;
+      background: rgba(255, 255, 255, 0.72);
+      font-size: 13px;
+    }
+
+    .home-screen .app-name strong {
+      font-size: 14px;
+      font-weight: 760;
+    }
+
+    .home-screen .app-name span,
+    .home-screen .status-pill {
+      display: none;
+    }
+
+    .home-screen .app-intro {
+      margin: 11px 1px 0;
+      color: var(--home-muted);
+      font-size: 10px;
+      line-height: 1.5;
+      display: -webkit-box;
+      overflow: hidden;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+    }
+
+    .home-screen .task-row {
+      min-height: 0;
+      margin-top: 14px;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .home-screen .task-dot,
+    .home-screen .task-row .mini-arrow {
+      display: none;
+    }
+
+    .home-screen .task-row span:nth-child(2) {
+      overflow: visible;
+      font-size: 13px;
+      font-weight: 680;
+      line-height: 1.55;
+      white-space: normal;
+    }
+
+    .home-screen .app-task-line {
+      min-height: 44px;
+      margin-top: 15px;
+      padding: 7px 8px 7px 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.76);
+      border-radius: 14px;
+      color: var(--home-ink);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.68), color-mix(in srgb, var(--soft) 28%, transparent));
+      box-shadow: inset 3px 0 0 color-mix(in srgb, var(--accent) 52%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.92), 0 5px 16px rgba(24, 39, 64, 0.045);
+    }
+
+    .home-screen .app-message {
+      min-width: 0;
+      margin: 12px 2px 0;
+      padding: 9px 1px 0;
+      border-top: 1px solid rgba(23, 50, 83, 0.08);
+      overflow: hidden;
+      color: var(--home-muted);
+      font-size: 10px;
+      line-height: 1.4;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .home-screen .message-label {
+      width: 6px;
+      height: 6px;
+      display: inline-block;
+      vertical-align: 1px;
+      margin-right: 7px;
+      border-radius: 50%;
+      background: #c96d61;
+      box-shadow: 0 0 0 3px rgba(201, 109, 97, 0.10);
+      font-size: 0;
+    }
+
+    .home-screen .app-task-line .task-dot {
+      display: block;
+    }
+
+    .home-screen .app-task-line .task-copy {
+      min-width: 0;
+      flex: 1;
+      overflow: hidden;
+      color: var(--home-ink);
+      font-size: 11px;
+      font-weight: 680;
+      line-height: 1.4;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .home-screen .app-task-line .primary-small {
+      min-width: 74px;
+      min-height: 32px;
+      padding: 0 10px;
+      border-radius: 10px;
+      font-size: 9px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.24), 0 5px 12px color-mix(in srgb, var(--accent) 18%, transparent);
+    }
+
+    .home-screen .card-footer {
+      display: none;
+    }
+
+    .home-screen .message-btn {
+      min-height: 38px;
+      gap: 6px;
+      font-size: 9px;
+    }
+
+    .home-screen .message-btn span:last-child {
+      max-width: 142px;
+    }
+
+    .home-screen .primary-small {
+      min-width: 86px;
+      min-height: 38px;
+      padding: 0 13px;
+      border-radius: 13px;
+      font-size: 10px;
+    }
+
+    .home-locked-grid {
+      display: grid !important;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 9px !important;
+    }
+
+    .home-screen .home-locked-grid .locked-card {
+      min-height: 74px;
+      padding: 12px;
+      gap: 9px;
+      border: 1px solid rgba(255, 255, 255, 0.72);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.56);
+    }
+
+    .home-screen .home-locked-grid .locked-card .app-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      font-size: 11px;
+    }
+
+    .home-screen .home-locked-grid .locked-copy strong {
+      font-size: 11px;
+      font-weight: 720;
+    }
+
+    .home-screen .home-locked-grid .locked-copy span {
+      margin-top: 4px;
+      font-size: 8px;
+    }
+
+    .home-screen .home-locked-grid .locked-label,
+    .home-screen .home-locked-grid .mini-arrow {
+      display: none;
+    }
+
+    .nav-btn {
+      min-height: 48px;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      border: 0;
+      color: var(--muted);
+      background: transparent;
+      font-size: 10px;
+      cursor: pointer;
+    }
+
+    .nav-glyph {
+      width: 20px;
+      height: 20px;
+      display: grid;
+      place-items: center;
+      border: 1.5px solid currentColor;
+      border-radius: 6px;
+      font-size: 9px;
+      font-weight: 800;
+    }
+
+    .nav-btn.active {
+      color: var(--blue);
+      font-weight: 760;
+    }
+
+    .nav-btn.active .nav-glyph { background: var(--blue-soft); }
+
+    .mine-head {
+      padding: 19px 18px 12px;
+    }
+
+    .mine-section-label {
+      margin: 18px 18px 9px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 720;
+      letter-spacing: 0.02em;
+    }
+
+    .mine-section-label + .current-hotel-card {
+      margin-top: 0;
+    }
+
+    .mine-section-label + .menu-list {
+      margin-top: 0;
+    }
+
+    .mine-kicker {
+      margin: 0;
+      color: var(--blue);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .mine-title {
+      margin: 7px 0 0;
+      font-size: 26px;
+      font-weight: 790;
+      letter-spacing: -0.05em;
+    }
+
+    .current-hotel-card {
+      margin: 14px 18px 0;
+      padding: 16px;
+      border: 1px solid rgba(53, 106, 244, 0.14);
+      border-radius: 21px;
+      background: var(--surface);
+      box-shadow: var(--card-shadow);
+    }
+
+    .current-hotel-card .hotel-switcher {
+      width: 100%;
+      justify-content: flex-start;
+    }
+
+    .current-hotel-card .chevron { margin-left: auto; }
+
+    .menu-list {
+      margin: 18px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: var(--surface);
+      box-shadow: var(--card-shadow);
+    }
+
+    .menu-item {
+      width: 100%;
+      min-height: 58px;
+      padding: 0 15px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border: 0;
+      border-bottom: 1px solid var(--line);
+      color: inherit;
+      background: transparent;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .menu-item:last-child { border-bottom: 0; }
+    .menu-item:active { background: var(--surface-soft); }
+
+    .menu-icon {
+      width: 32px;
+      height: 32px;
+      display: grid;
+      place-items: center;
+      border-radius: 10px;
+      color: var(--blue);
+      background: var(--blue-soft);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .menu-copy {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .menu-copy strong {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .menu-copy small {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 9px;
+    }
+
+    .page-body {
+      padding: 18px;
+    }
+
+    .page-intro {
+      margin-bottom: 18px;
+    }
+
+    .page-intro h2 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 790;
+      letter-spacing: -0.04em;
+    }
+
+    .page-intro p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.65;
+    }
+
+    .panel {
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: var(--surface);
+      box-shadow: var(--card-shadow);
+    }
+
+    .panel + .panel { margin-top: 13px; }
+
+    .panel-title {
+      margin: 0 0 14px;
+      font-size: 14px;
+      font-weight: 760;
+    }
+
+    .hotel-row {
+      padding: 13px 0;
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .hotel-row:first-child { padding-top: 0; }
+    .hotel-row:last-child { padding-bottom: 0; border-bottom: 0; }
+
+    .hotel-row-copy {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .hotel-row-copy strong {
+      display: block;
+      overflow: hidden;
+      font-size: 13px;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .hotel-row-copy small {
+      display: block;
+      margin-top: 5px;
+      overflow: hidden;
+      color: var(--muted);
+      font-size: 10px;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .text-btn {
+      min-height: 40px;
+      padding: 0 10px;
+      border: 0;
+      border-radius: 10px;
+      color: var(--blue);
+      background: var(--blue-soft);
+      font-size: 10px;
+      font-weight: 720;
+      cursor: pointer;
+    }
+
+    .text-btn.neutral {
+      color: var(--ink-soft);
+      background: var(--surface-soft);
+    }
+
+    .primary-btn {
+      width: 100%;
+      min-height: 50px;
+      padding: 0 18px;
+      border: 0;
+      border-radius: 15px;
+      color: #fff;
+      background: var(--blue);
+      font-size: 13px;
+      font-weight: 760;
+      cursor: pointer;
+      box-shadow: 0 12px 24px rgba(53, 106, 244, 0.22);
+      transition: transform 150ms ease;
+    }
+
+    .secondary-btn {
+      width: 100%;
+      min-height: 48px;
+      padding: 0 18px;
+      border: 1px solid var(--line-strong);
+      border-radius: 15px;
+      color: var(--ink);
+      background: var(--surface);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .danger-btn {
+      width: 100%;
+      min-height: 48px;
+      padding: 0 18px;
+      border: 1px solid rgba(200, 110, 99, 0.20);
+      border-radius: 15px;
+      color: var(--coral);
+      background: var(--coral-soft);
+      font-size: 13px;
+      font-weight: 720;
+      cursor: pointer;
+    }
+
+    .button-stack {
+      display: grid;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .form-group + .form-group { margin-top: 16px; }
+
+    .address-select-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .address-field {
+      min-width: 0;
+      display: grid;
+      gap: 6px;
+    }
+
+    .address-field > span {
+      color: var(--muted);
+      font-size: 9px;
+      font-weight: 650;
+    }
+
+    .address-field .select {
+      min-width: 0;
+      padding-right: 7px;
+    }
+
+    .address-detail { margin-top: 10px; }
+
+    .form-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 7px;
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .form-label small {
+      color: var(--muted);
+      font-size: 9px;
+      font-weight: 500;
+    }
+
+    .input,
+    .textarea,
+    .select {
+      width: 100%;
+      min-height: 48px;
+      padding: 12px 13px;
+      border: 1px solid var(--line-strong);
+      border-radius: 13px;
+      color: var(--ink);
+      background: var(--surface);
+      font-size: 12px;
+      transition: border-color 150ms ease, box-shadow 150ms ease;
+    }
+
+    .textarea {
+      min-height: 92px;
+      resize: vertical;
+      line-height: 1.65;
+    }
+
+    .input:focus,
+    .textarea:focus,
+    .select:focus {
+      border-color: rgba(53, 106, 244, 0.55);
+      box-shadow: 0 0 0 4px rgba(53, 106, 244, 0.08);
+      outline: 0;
+    }
+
+    .field-error {
+      display: none;
+      margin-top: 6px;
+      color: var(--coral);
+      font-size: 10px;
+    }
+
+    .field-error.show { display: block; }
+
+    .logo-upload {
+      min-height: 86px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      border: 1px dashed var(--line-strong);
+      border-radius: 15px;
+      background: var(--surface-soft);
+      cursor: pointer;
+    }
+
+    .logo-preview {
+      width: 56px;
+      height: 56px;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      border-radius: 16px;
+      color: var(--blue);
+      background: var(--blue-soft);
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .logo-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .logo-upload strong {
+      display: block;
+      font-size: 12px;
+    }
+
+    .logo-upload small {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 9px;
+    }
+
+    .context-section + .context-section { margin-top: 22px; }
+
+    .context-title {
+      margin: 0 0 12px;
+      padding-bottom: 9px;
+      border-bottom: 1px solid var(--line);
+      font-size: 14px;
+      font-weight: 760;
+    }
+
+    .empty {
+      min-height: 220px;
+      padding: 30px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .empty-mark {
+      width: 54px;
+      height: 54px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      color: var(--blue);
+      background: var(--blue-soft);
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .empty strong {
+      margin-top: 15px;
+      font-size: 14px;
+    }
+
+    .empty p {
+      max-width: 230px;
+      margin: 7px 0 0;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.65;
+    }
+
+    .upload-box {
+      min-height: 116px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: 1px dashed rgba(53, 106, 244, 0.34);
+      border-radius: 18px;
+      color: var(--blue);
+      background: var(--blue-soft);
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .upload-box strong { font-size: 13px; }
+    .upload-box small { margin-top: 6px; color: var(--ink-soft); font-size: 9px; }
+
+    .asset-tabs {
+      margin: 0 0 14px;
+      padding: 3px;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 3px;
+      border-radius: 13px;
+      background: var(--surface-soft);
+    }
+
+    .asset-tab {
+      min-height: 38px;
+      padding: 0 12px;
+      border: 0;
+      border-radius: 10px;
+      color: var(--muted);
+      background: transparent;
+      font-size: 11px;
+      font-weight: 720;
+      cursor: pointer;
+    }
+
+    .asset-tab.active {
+      color: var(--ink);
+      background: var(--surface);
+      box-shadow: 0 4px 12px rgba(23, 50, 83, 0.08);
+    }
+
+    .asset-tab:disabled {
+      color: #b3bcc9;
+      background: transparent;
+      cursor: not-allowed;
+    }
+
+    .asset-grid {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .asset-card {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      background: var(--surface);
+    }
+
+    .asset-delete {
+      min-width: 34px;
+      min-height: 28px;
+      padding: 0 8px;
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      z-index: 1;
+      border: 0;
+      border-radius: 9px;
+      color: #fff;
+      background: rgba(20, 36, 58, 0.62);
+      font-size: 9px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .asset-delete:active { background: rgba(20, 36, 58, 0.82); }
+
+    .asset-thumb {
+      aspect-ratio: 1.25;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      color: var(--blue);
+      background: var(--blue-soft);
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .asset-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .asset-name {
+      padding: 9px;
+      overflow: hidden;
+      color: var(--ink-soft);
+      font-size: 9px;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .subscription-row,
+    .order-row {
+      padding: 14px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .subscription-row:first-child,
+    .order-row:first-child { padding-top: 0; }
+
+    .subscription-row:last-child,
+    .order-row:last-child { padding-bottom: 0; border-bottom: 0; }
+
+    .subscription-main,
+    .order-main {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+    }
+
+    .subscription-copy,
+    .order-copy {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .subscription-copy strong,
+    .order-copy strong {
+      display: block;
+      font-size: 13px;
+    }
+
+    .subscription-copy small,
+    .order-copy small {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.4;
+    }
+
+    .subscription-actions {
+      margin-top: 10px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .app-detail-hero {
+      padding: 23px 18px 20px;
+      border-bottom: 1px solid var(--line);
+      background: var(--surface);
+    }
+
+    .app-detail-icon {
+      --accent: var(--blue);
+      --soft: var(--blue-soft);
+      width: 62px;
+      height: 62px;
+      display: grid;
+      place-items: center;
+      border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
+      border-radius: 20px;
+      color: var(--accent);
+      background: var(--soft);
+      font-size: 21px;
+      font-weight: 800;
+    }
+
+    .app-detail-hero h2 {
+      margin: 17px 0 0;
+      font-size: 26px;
+      font-weight: 790;
+      letter-spacing: -0.05em;
+    }
+
+    .app-detail-hero p {
+      margin: 9px 0 0;
+      color: var(--ink-soft);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .prototype-note {
+      margin-top: 13px;
+      padding: 11px 12px;
+      border: 1px solid rgba(53, 106, 244, 0.14);
+      border-radius: 13px;
+      color: var(--ink-soft);
+      background: var(--blue-soft);
+      font-size: 10px;
+      line-height: 1.6;
+    }
+
+    .qr-wrap {
+      display: grid;
+      place-items: center;
+      padding: 24px 0 12px;
+    }
+
+    .qr-placeholder {
+      width: 184px;
+      height: 184px;
+      padding: 13px;
+      display: grid;
+      grid-template-columns: repeat(9, 1fr);
+      grid-template-rows: repeat(9, 1fr);
+      gap: 4px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fff;
+      box-shadow: var(--card-shadow);
+    }
+
+    .qr-cell {
+      border-radius: 2px;
+      background: #d9e0e9;
+    }
+
+    .qr-cell.dark { background: var(--navy); }
+
+    .qr-label {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 10px;
+      text-align: center;
+    }
+
+    .login-screen {
+      min-height: 100%;
+      padding: 30px 24px calc(24px + env(safe-area-inset-bottom));
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background:
+        radial-gradient(circle at 78% 18%, rgba(53, 106, 244, 0.11), transparent 26%),
+        var(--canvas);
+    }
+
+    .login-back {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      color: var(--ink);
+      background: rgba(255,255,255,0.78);
+      cursor: pointer;
+    }
+
+    .login-brand {
+      padding-top: 42px;
+    }
+
+    .login-logo {
+      width: 58px;
+      height: 58px;
+      display: grid;
+      place-items: center;
+      border-radius: 19px;
+      color: #fff;
+      background: var(--navy);
+      box-shadow: 0 16px 34px rgba(23, 50, 83, 0.22);
+      font-size: 16px;
+      font-weight: 820;
+      letter-spacing: -0.04em;
+    }
+
+    .login-brand h1 {
+      margin: 24px 0 0;
+      font-size: 31px;
+      font-weight: 800;
+      letter-spacing: -0.055em;
+    }
+
+    .login-brand p {
+      max-width: 288px;
+      margin: 13px 0 0;
+      color: var(--ink-soft);
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    .login-reason {
+      margin-top: 19px;
+      padding: 13px 14px;
+      border: 1px solid rgba(53, 106, 244, 0.12);
+      border-radius: 14px;
+      color: var(--ink-soft);
+      background: var(--blue-soft);
+      font-size: 11px;
+      line-height: 1.65;
+    }
+
+    .login-reason strong {
+      display: block;
+      margin-bottom: 3px;
+      color: var(--ink);
+      font-size: 12px;
+    }
+
+    .wechat-btn {
+      width: 100%;
+      min-height: 52px;
+      border: 0;
+      border-radius: 16px;
+      color: #fff;
+      background: #168f57;
+      font-size: 14px;
+      font-weight: 760;
+      cursor: pointer;
+      box-shadow: 0 12px 26px rgba(22, 143, 87, 0.20);
+    }
+
+    .wechat-btn:disabled { cursor: wait; opacity: 0.78; }
+
+    .login-later {
+      width: 100%;
+      min-height: 44px;
+      margin-top: 8px;
+      border: 0;
+      color: var(--ink-soft);
+      background: transparent;
+      font-size: 12px;
+      font-weight: 650;
+      cursor: pointer;
+    }
+
+    .login-note {
+      margin: 11px 0 0;
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.6;
+      text-align: center;
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 30;
+      display: flex;
+      align-items: flex-end;
+      background: rgba(15, 28, 45, 0.38);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 180ms ease;
+    }
+
+    .overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .sheet {
+      width: 100%;
+      max-height: 78%;
+      overflow-y: auto;
+      padding: 10px 18px calc(22px + env(safe-area-inset-bottom));
+      border-radius: 25px 25px 0 0;
+      background: var(--surface);
+      box-shadow: 0 -24px 60px rgba(23, 50, 83, 0.20);
+      transform: translateY(100%);
+      transition: transform 220ms cubic-bezier(.22,.9,.36,1);
+    }
+
+    .overlay.open .sheet { transform: translateY(0); }
+
+    .sheet-handle {
+      width: 34px;
+      height: 4px;
+      margin: 0 auto 16px;
+      border-radius: 99px;
+      background: #d9e0e8;
+    }
+
+    .sheet-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .sheet-head h3 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 780;
+    }
+
+    .sheet-hotel {
+      width: 100%;
+      min-height: 62px;
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      color: inherit;
+      background: var(--surface);
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .sheet-hotel + .sheet-hotel { margin-top: 9px; }
+    .sheet-hotel.current { border-color: rgba(53, 106, 244, 0.25); background: var(--blue-soft); }
+
+    .sheet-hotel-copy {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .sheet-hotel-copy strong {
+      display: block;
+      overflow: hidden;
+      font-size: 12px;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .sheet-hotel-copy small {
+      display: block;
+      margin-top: 4px;
+      overflow: hidden;
+      color: var(--muted);
+      font-size: 9px;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .sheet-current {
+      color: var(--blue);
+      font-size: 9px;
+      font-weight: 760;
+    }
+
+    .confirm-copy {
+      margin: 0 0 18px;
+      color: var(--ink-soft);
+      font-size: 12px;
+      line-height: 1.75;
+    }
+
+    .toast {
+      max-width: calc(100% - 40px);
+      padding: 10px 14px;
+      position: absolute;
+      left: 50%;
+      bottom: calc(82px + env(safe-area-inset-bottom));
+      z-index: 50;
+      border-radius: 999px;
+      color: #fff;
+      background: rgba(20, 36, 58, 0.94);
+      box-shadow: 0 12px 30px rgba(20, 36, 58, 0.22);
+      font-size: 11px;
+      line-height: 1.4;
+      text-align: center;
+      opacity: 0;
+      pointer-events: none;
+      transform: translate(-50%, 8px);
+      transition: opacity 160ms ease, transform 160ms ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
+    .spinner {
+      width: 16px;
+      height: 16px;
+      display: inline-block;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      vertical-align: -3px;
+      animation: spin 700ms linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (min-width: 700px) {
+      body {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 24px;
+        padding: 24px;
+        background:
+          radial-gradient(circle at 18% 15%, rgba(255,255,255,0.70), transparent 26%),
+          radial-gradient(circle at 82% 84%, rgba(255,255,255,0.42), transparent 28%),
+          #dfe4eb;
+      }
+
+      #app {
+        width: 390px;
+        height: 844px;
+        flex: 0 0 auto;
+        border: 7px solid rgba(255,255,255,0.76);
+        border-radius: 46px;
+        box-shadow: var(--shadow);
+      }
+
+      #prototype-tools {
+        width: 220px;
+        padding: 12px;
+        border-radius: 20px;
+      }
+
+      #prototype-tools .demo-state-controls {
+        padding: 8px 9px;
+        border: 0;
+        background: transparent;
+        box-shadow: none;
+      }
+
+      #prototype-tools .demo-state-options {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        overflow: visible;
+      }
+
+      #prototype-tools .demo-state-option {
+        min-width: 0;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <aside id="prototype-tools" aria-label="原型演示控制"></aside>
+  <div id="app"></div>
+  <script>
+    (function () {
+      'use strict';
+
+      var STORAGE_KEY = 'hotel-ai-assistant-mvp-v2';
+      var toastTimer = null;
+      var routeStack = [];
+      var selectedAppId = null;
+      var editingHotelId = null;
+      var pendingAuthAction = null;
+      var pageBeforeLogin = 'home';
+      var isCreatingFirstHotel = false;
+      var pendingLogoData = '';
+      var transientAssets = {};
+      var transientQrAssets = {};
+      var transientVideoAssets = {};
+      var assetTab = 'images';
+      var demoHomeState = 'both';
+
+      var appCatalog = [
+        {
+          id: 'yingdian',
+          name: '营点AI',
+          glyph: '营',
+          accent: '#3263d9',
+          soft: '#dce7fb',
+          intro: '帮助酒店快速生成可发布的图片、视频和文案。',
+          task: '本周还没有新的宣传内容',
+          message: '宣传视频已经生成',
+          action: '去创作'
+        },
+        {
+          id: 'zhangqing',
+          name: '账清AI',
+          glyph: '账',
+          accent: '#3e9679',
+          soft: '#e9f5f0',
+          intro: '帮助酒店核对房账和收款记录，定位需要确认的异常。',
+          task: '今天有1笔账目需要确认',
+          message: '今日账清文件处理完成',
+          action: '查看异常'
+        },
+        {
+          id: 'luggage',
+          name: '行李寄存',
+          glyph: '寄',
+          accent: '#6d72b8',
+          soft: '#eff0fb',
+          intro: '记录酒店行李寄存、领取和交接情况。',
+          task: '1件行李等待交接',
+          message: '行李领取状态已经更新',
+          action: '查看记录'
+        },
+        {
+          id: 'news',
+          name: '酒店资讯',
+          glyph: '讯',
+          accent: '#438a91',
+          soft: '#eaf5f5',
+          intro: '集中查看与酒店经营相关的信息和动态。',
+          task: '3条资讯建议关注',
+          message: '今日经营资讯已经更新',
+          action: '查看资讯'
+        },
+        {
+          id: 'touch',
+          name: '碰碰贴',
+          glyph: '碰',
+          accent: '#4f70b7',
+          soft: '#edf1fa',
+          intro: '查看酒店触达设备及其当前使用状态。',
+          task: '1个设备离线',
+          message: '设备状态已经更新',
+          action: '管理设备'
+        },
+        {
+          id: 'feedback',
+          name: '吐槽码',
+          glyph: '诉',
+          accent: '#c86e63',
+          soft: '#faece9',
+          intro: '收集住客反馈，并帮助酒店查看需要处理的问题。',
+          task: '1条严重反馈待处理',
+          message: '收到新的住客反馈',
+          action: '查看反馈'
+        }
+      ];
+
+      var regionOptions = {
+        '贵州省': {
+          '贵阳市': ['观山湖区', '云岩区', '南明区', '花溪区'],
+          '遵义市': ['汇川区', '红花岗区', '播州区']
+        },
+        '四川省': {
+          '成都市': ['锦江区', '青羊区', '武侯区', '高新区']
+        },
+        '云南省': {
+          '昆明市': ['五华区', '盘龙区', '官渡区', '西山区']
+        }
+      };
+
+      var defaultState = {
+        currentPage: 'home',
+        isWechatAuthorized: false,
+        isLoggedIn: false,
+        hasCompletedOnboarding: false,
+        currentHotelId: 'hotel-1',
+        hotels: [
+          {
+            id: 'hotel-1',
+            name: '贵山和泰酒店',
+            province: '贵州省',
+            city: '贵阳市',
+            district: '观山湖区',
+            detailAddress: '',
+            address: '贵州省贵阳市观山湖区',
+            logo: ''
+          }
+        ],
+        hotelApps: {
+          'hotel-1': {
+            yingdian: { opened: true, messageRead: false },
+            zhangqing: { opened: true, messageRead: false },
+            luggage: { opened: false, messageRead: false },
+            news: { opened: false, messageRead: false },
+            touch: { opened: false, messageRead: false },
+            feedback: { opened: false, messageRead: false }
+          }
+        },
+        contexts: {
+          'hotel-1': {}
+        },
+        orders: []
+      };
+
+      function clone(value) {
+        return JSON.parse(JSON.stringify(value));
+      }
+
+      function loadState() {
+        try {
+          var saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+          if (!saved || !Array.isArray(saved.hotels)) return clone(defaultState);
+          var loaded = Object.assign(clone(defaultState), saved, { currentPage: 'home' });
+          if (!loaded.hasCompletedOnboarding || !loaded.hotels.length) loaded.isLoggedIn = false;
+          return loaded;
+        } catch (error) {
+          return clone(defaultState);
+        }
+      }
+
+      var state = loadState();
+      var initialDemoMode = new URLSearchParams(window.location.search).get('demo');
+      if (initialDemoMode === 'first-login') {
+        state = clone(defaultState);
+        pendingAuthAction = { type: 'continue' };
+        pageBeforeLogin = 'home';
+        state.currentPage = 'login';
+      } else if (window.location.hash.slice(1) === 'login') {
+        pendingAuthAction = { type: 'continue' };
+        pageBeforeLogin = 'home';
+        state.currentPage = 'login';
+      }
+
+      function saveState() {
+        var persistable = clone(state);
+        persistable.currentPage = 'home';
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(persistable));
+      }
+
+      function escapeHTML(value) {
+        return String(value == null ? '' : value)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+      }
+
+      function getCurrentHotel() {
+        return state.hotels.find(function (hotel) {
+          return hotel.id === state.currentHotelId;
+        }) || state.hotels[0] || null;
+      }
+
+      function createHotelApps() {
+        var result = {};
+        appCatalog.forEach(function (app) {
+          result[app.id] = { opened: false, messageRead: false };
+        });
+        return result;
+      }
+
+      function getHotelApps() {
+        if (!state.hotelApps[state.currentHotelId]) {
+          state.hotelApps[state.currentHotelId] = createHotelApps();
+        }
+        return state.hotelApps[state.currentHotelId];
+      }
+
+      function getApp(appId) {
+        return appCatalog.find(function (app) { return app.id === appId; });
+      }
+
+      function loginReason(action) {
+        var reasons = {
+          'hotel-sheet': ['登录后切换酒店', '酒店与应用数据将按你的微信身份保存。'],
+          'app-task': ['登录后继续处理任务', '授权成功后将回到刚才选择的应用任务。'],
+          'app-detail': ['登录后查看应用', '授权成功后将继续查看或进入该应用。'],
+          'mine-page': ['登录后进入管理功能', '酒店、素材、应用和订单需要关联你的微信身份。']
+        };
+        return reasons[action && action.type] || ['登录后继续使用', '使用微信授权登录，继续管理酒店与应用。'];
+      }
+
+      function requireLogin(authAction) {
+        if (state.isLoggedIn && state.hasCompletedOnboarding && state.hotels.length) return false;
+        pendingAuthAction = authAction || { type: 'continue' };
+        pageBeforeLogin = state.currentPage === 'login' ? 'home' : state.currentPage;
+        routeStack.push(pageBeforeLogin);
+        state.currentPage = 'login';
+        window.location.hash = 'login';
+        render();
+        return true;
+      }
+
+      function continueAfterLogin() {
+        var action = pendingAuthAction;
+        pendingAuthAction = null;
+        routeStack = [];
+        if (!state.hotels.length) {
+          editingHotelId = null;
+          pendingLogoData = '';
+          return navigate('hotel-form', { replace: true });
+        }
+        if (!action) return navigate('home', { replace: true });
+        if (action.type === 'hotel-sheet') {
+          navigate(action.returnPage || 'home', { replace: true });
+          return window.setTimeout(function () { openOverlay('hotel-sheet'); }, 0);
+        }
+        if (action.type === 'app-task') {
+          var targetAppState = getHotelApps()[action.appId] || { opened: false };
+          if (!targetAppState.opened) {
+            selectedAppId = action.appId;
+            return navigate('app-detail', { replace: true });
+          }
+          navigate('home', { replace: true });
+          return window.setTimeout(function () { showToast('原型演示：将进入' + getApp(action.appId).name + '处理任务'); }, 0);
+        }
+        if (action.type === 'app-detail') {
+          selectedAppId = action.appId;
+          return navigate('app-detail', { replace: true });
+        }
+        if (action.type === 'mine-page') return navigate(action.page, { replace: true });
+        return navigate(pageBeforeLogin || 'home', { replace: true });
+      }
+
+      function startFirstHotelCreation() {
+        state.isWechatAuthorized = true;
+        state.isLoggedIn = false;
+        state.hasCompletedOnboarding = false;
+        isCreatingFirstHotel = true;
+        editingHotelId = null;
+        pendingLogoData = '';
+        routeStack = [];
+        state.currentPage = 'hotel-form';
+        window.location.hash = 'hotel-form';
+        render();
+      }
+
+      function hotelInitials(hotel) {
+        if (!hotel || !hotel.name) return '酒店';
+        return hotel.name.replace(/酒店/g, '').slice(0, 2) || '酒店';
+      }
+
+      function hotelMark(hotel, className) {
+        var classes = className || 'hotel-mark';
+        if (hotel && hotel.logo) {
+          return '<span class="' + classes + '"><img src="' + hotel.logo + '" alt=""></span>';
+        }
+        return '<span class="' + classes + '">' + escapeHTML(hotelInitials(hotel)) + '</span>';
+      }
+
+      function showToast(message) {
+        var toast = document.getElementById('toast');
+        if (!toast) return;
+        window.clearTimeout(toastTimer);
+        toast.textContent = message;
+        toast.classList.add('show');
+        toastTimer = window.setTimeout(function () {
+          toast.classList.remove('show');
+        }, 1900);
+      }
+
+      function navigate(page, options) {
+        var settings = options || {};
+        if (!settings.replace && state.currentPage !== page) {
+          routeStack.push(state.currentPage);
+        }
+        state.currentPage = page;
+        window.location.hash = page;
+        render();
+      }
+
+      function goBack() {
+        var target = routeStack.pop() || 'home';
+        state.currentPage = target;
+        window.location.hash = target;
+        render();
+      }
+
+      function pageTop(title) {
+        return [
+          '<header class="page-top">',
+          '<button class="icon-btn" type="button" data-action="back" aria-label="返回"><span class="arrow-left"></span></button>',
+          '<h1>' + escapeHTML(title) + '</h1>',
+          '<span></span>',
+          '</header>'
+        ].join('');
+      }
+
+      function bottomNav(active) {
+        return [
+          '<nav class="bottom-nav" aria-label="底部导航">',
+          '<button class="nav-btn ' + (active === 'home' ? 'active' : '') + '" type="button" data-action="nav-home">',
+          '<span class="nav-glyph">首</span><span>首页</span></button>',
+          '<button class="nav-btn ' + (active === 'mine' ? 'active' : '') + '" type="button" data-action="nav-mine">',
+          '<span class="nav-glyph">我</span><span>我的</span></button>',
+          '</nav>'
+        ].join('');
+      }
+
+      function hotelSwitcher(hotel) {
+        return [
+          '<button class="hotel-switcher" type="button" data-action="open-hotel-sheet">',
+          hotelMark(hotel),
+          '<span class="hotel-copy">',
+          '<span class="hotel-title"><strong>' + escapeHTML(hotel ? hotel.name : '尚未建立酒店') + '</strong><span class="chevron"></span></span>',
+          '<small>' + escapeHTML(hotel ? hotel.address : '请先建立酒店') + '</small>',
+          '</span>',
+          '</button>'
+        ].join('');
+      }
+
+      function appStyle(app) {
+        return '--accent:' + app.accent + ';--soft:' + app.soft;
+      }
+
+      function selectOptions(values, selectedValue, placeholder) {
+        return ['<option value="">' + placeholder + '</option>'].concat(values.map(function (value) {
+          return '<option value="' + escapeHTML(value) + '"' + (value === selectedValue ? ' selected' : '') + '>' + escapeHTML(value) + '</option>';
+        })).join('');
+      }
+
+      function openedAppCard(app, appState) {
+        var hasTask = demoHomeState !== 'message' && demoHomeState !== 'empty' && Boolean(app.task);
+        var hasMessage = demoHomeState !== 'task' && demoHomeState !== 'empty' && Boolean(app.message);
+        var dynamicContent = hasTask ? [
+          '<div class="app-task-line">',
+          '<span class="task-dot"></span>',
+          '<span class="task-copy">' + app.task + '</span>',
+          '<button class="primary-small" type="button" data-action="open-task" data-app-id="' + app.id + '">' + app.action + '</button>',
+          '</div>'
+        ].join('') : hasMessage ? [
+          '<p class="app-message"><span class="message-label" aria-hidden="true"></span><span class="message-copy">' + app.message + '</span></p>'
+        ].join('') : [
+          ''
+        ].join('');
+        return [
+          '<article class="app-card" style="' + appStyle(app) + '">',
+          '<div class="app-card-head">',
+          '<span class="app-icon">' + app.glyph + '</span>',
+          '<span class="app-name"><strong>' + app.name + '</strong><span>已开通</span></span>',
+          '<span class="status-pill">运营中</span>',
+          '</div>',
+          '<p class="app-intro">' + app.intro + '</p>',
+          dynamicContent,
+          '</article>'
+        ].join('');
+      }
+
+      function demoStateControls() {
+        var options = [
+          ['both', '任务+消息'],
+          ['task', '仅任务'],
+          ['message', '仅消息'],
+          ['empty', '无任务无消息']
+        ];
+        return [
+          '<div class="demo-state-controls" aria-label="原型演示：切换卡片状态">',
+          '<span class="demo-state-label">原型演示 · 卡片状态</span>',
+          '<div class="demo-state-options">',
+          options.map(function (option) {
+            return '<button class="demo-state-option ' + (demoHomeState === option[0] ? 'active' : '') + '" type="button" data-action="set-demo-state" data-demo-state="' + option[0] + '">' + option[1] + '</button>';
+          }).join(''),
+          '</div></div>',
+          '<div class="demo-auth-controls" aria-label="原型演示：切换登录流程">',
+          '<span class="demo-state-label">原型演示 · 登录流程</span>',
+          '<div class="demo-state-options">',
+          '<button class="demo-state-option" type="button" data-action="demo-first-login">首次登录</button>',
+          '<button class="demo-state-option" type="button" data-action="demo-returning-login">再次登录</button>',
+          '</div></div>'
+        ].join('');
+      }
+
+      function lockedAppCard(app) {
+        return [
+          '<button class="locked-card" type="button" data-action="app-detail" data-app-id="' + app.id + '">',
+          '<span class="app-icon">' + app.glyph + '</span>',
+          '<span class="locked-copy"><strong>' + app.name + '</strong><span>' + app.intro + '</span></span>',
+          '<span class="locked-label">未开通</span><span class="mini-arrow"></span>',
+          '</button>'
+        ].join('');
+      }
+
+      function pageHome() {
+        var hotel = getCurrentHotel();
+        if (!hotel) return pageNoHotel();
+        var hotelApps = getHotelApps();
+        var opened = appCatalog.filter(function (app) { return hotelApps[app.id] && hotelApps[app.id].opened; });
+        var locked = appCatalog.filter(function (app) { return !hotelApps[app.id] || !hotelApps[app.id].opened; });
+        return [
+          '<main class="screen home-screen" data-screen-label="首页">',
+          '<header class="home-head">',
+          hotelSwitcher(hotel),
+          '</header>',
+          '<section class="home-hero"><h1>你的酒店工作助手</h1></section>',
+          '<div class="scroll"><div class="content">',
+          '<section class="section">',
+          '<div class="section-title"><div><h2>我能帮你</h2></div></div>',
+          '<div class="app-list">',
+          opened.length ? opened.map(function (app) { return openedAppCard(app, hotelApps[app.id]); }).join('') :
+            '<div class="panel empty"><span class="empty-mark">应</span><strong>还没有开通应用</strong><p>可以从下方查看应用简介并开通单个应用。</p></div>',
+          '</div>',
+          '</section>',
+          locked.length ? [
+            '<section class="section">',
+            '<div class="section-title"><div><h2>更多能力</h2><p>未开通应用只能查看摘要简介</p></div></div>',
+            '<div class="app-list home-locked-grid">' + locked.map(lockedAppCard).join('') + '</div>',
+            '</section>'
+          ].join('') : '',
+          '</div></div>',
+          bottomNav('home'),
+          '</main>'
+        ].join('');
+      }
+
+      function pageMine() {
+        var hotel = getCurrentHotel();
+        if (!hotel) return pageNoHotel();
+        var hotelMenuItems = [
+          ['店', '酒店管理', '新增、编辑和切换酒店', 'hotel-management'],
+          ['材', '酒店素材库', '当前酒店的共享素材', 'assets'],
+          ['应', '应用管理', '查看当前酒店的应用状态', 'subscriptions'],
+          ['单', '应用订单', '当前酒店的单应用购买记录', 'orders']
+        ];
+        var platformMenuItems = [
+          ['服', '客服与设置', '企业微信客服与账号设置', 'customer']
+        ];
+        return [
+          '<main class="screen" data-screen-label="我的">',
+          '<div class="scroll">',
+          '<header class="mine-head"><h1 class="mine-title">我的</h1></header>',
+          '<div class="mine-section-label">当前酒店</div>',
+          '<section class="current-hotel-card">' + hotelSwitcher(hotel) + '</section>',
+          '<div class="menu-list">',
+          hotelMenuItems.map(function (item) {
+            return [
+              '<button class="menu-item" type="button" data-action="navigate" data-page="' + item[3] + '">',
+              '<span class="menu-icon">' + item[0] + '</span>',
+              '<span class="menu-copy"><strong>' + item[1] + '</strong><small>' + item[2] + '</small></span>',
+              '<span class="mini-arrow"></span>',
+              '</button>'
+            ].join('');
+          }).join(''),
+          '</div>',
+          '<div class="mine-section-label">平台服务</div>',
+          '<div class="menu-list">',
+          platformMenuItems.map(function (item) {
+            return [
+              '<button class="menu-item" type="button" data-action="navigate" data-page="' + item[3] + '">',
+              '<span class="menu-icon">' + item[0] + '</span>',
+              '<span class="menu-copy"><strong>' + item[1] + '</strong><small>' + item[2] + '</small></span>',
+              '<span class="mini-arrow"></span>',
+              '</button>'
+            ].join('');
+          }).join(''),
+          '</div>',
+          '</div>',
+          bottomNav('mine'),
+          '</main>'
+        ].join('');
+      }
+
+      function pageHotelManagement() {
+        var currentId = state.currentHotelId;
+        return [
+          '<main class="screen" data-screen-label="酒店管理">',
+          pageTop('酒店管理'),
+          '<div class="scroll"><div class="page-body">',
+          '<div class="page-intro"><h2>管理酒店</h2><p>首页和“我的”始终使用同一个当前酒店。</p></div>',
+          '<section class="panel"><h3 class="panel-title">我的酒店</h3>',
+          state.hotels.map(function (hotel) {
+            return [
+              '<div class="hotel-row">',
+              hotelMark(hotel),
+              '<span class="hotel-row-copy"><strong>' + escapeHTML(hotel.name) + '</strong><small>' + escapeHTML(hotel.address) + '</small></span>',
+              hotel.id === currentId ? '<span class="status-pill" style="--accent:var(--blue);--soft:var(--blue-soft)">当前</span>' :
+                '<button class="text-btn" type="button" data-action="switch-hotel" data-hotel-id="' + hotel.id + '">切换</button>',
+              '<button class="text-btn neutral" type="button" data-action="edit-hotel" data-hotel-id="' + hotel.id + '">编辑</button>',
+              '</div>'
+            ].join('');
+          }).join(''),
+          '</section>',
+          '<div class="button-stack"><button class="primary-btn" type="button" data-action="add-hotel">新增酒店</button></div>',
+          '</div></div>',
+          '</main>'
+        ].join('');
+      }
+
+      function pageHotelForm() {
+        var hotel = editingHotelId ? state.hotels.find(function (item) { return item.id === editingHotelId; }) : null;
+        var title = isCreatingFirstHotel ? '创建第一家酒店' : (hotel ? '编辑酒店' : '新增酒店');
+        var selectedProvince = hotel && hotel.province ? hotel.province : '';
+        var selectedCity = hotel && hotel.city ? hotel.city : '';
+        var selectedDistrict = hotel && hotel.district ? hotel.district : '';
+        var selectedDetailAddress = hotel && hotel.detailAddress ? hotel.detailAddress : (hotel && !hotel.province ? hotel.address : '');
+        var cityValues = selectedProvince && regionOptions[selectedProvince] ? Object.keys(regionOptions[selectedProvince]) : [];
+        var districtValues = selectedProvince && selectedCity && regionOptions[selectedProvince] && regionOptions[selectedProvince][selectedCity] ? regionOptions[selectedProvince][selectedCity] : [];
+        pendingLogoData = hotel ? hotel.logo : pendingLogoData;
+        return [
+          '<main class="screen" data-screen-label="' + title + '">',
+          isCreatingFirstHotel ? '<header class="page-top"><span></span><h1>完成首次登录</h1><span></span></header>' : pageTop(title),
+          '<div class="scroll"><form class="page-body" id="hotel-form" novalidate>',
+          '<div class="page-intro"><h2>' + title + '</h2><p>' + (isCreatingFirstHotel ? '微信授权已完成。创建至少一家酒店后，才能完成平台登录。' : '酒店名称和地址为必填，Logo可以稍后补充。') + '</p></div>',
+          isCreatingFirstHotel ? '<div class="prototype-note">酒店是应用数据、素材、订单和任务的归属主体。首次登录必须先建立酒店身份。</div>' : '',
+          '<section class="panel">',
+          '<div class="form-group"><span class="form-label">酒店Logo <small>非必填</small></span>',
+          '<label class="logo-upload" for="hotel-logo">',
+          '<span class="logo-preview" id="logo-preview">' + (pendingLogoData ? '<img src="' + pendingLogoData + '" alt="Logo预览">' : '店') + '</span>',
+          '<span><strong>上传酒店Logo</strong><small>点击选择本地图片</small></span>',
+          '</label><input id="hotel-logo" type="file" accept="image/*" hidden></div>',
+          '<div class="form-group"><label class="form-label" for="hotel-name">酒店名称 <small>必填</small></label>',
+          '<input class="input" id="hotel-name" name="name" value="' + escapeHTML(hotel ? hotel.name : '') + '" placeholder="请输入酒店名称" required>',
+          '<span class="field-error" id="hotel-name-error">请填写酒店名称</span></div>',
+          '<div class="form-group"><span class="form-label">酒店地址 <small>必填</small></span>',
+          '<div class="address-select-grid">',
+          '<label class="address-field"><span>省</span><select class="select" id="hotel-province" name="province" aria-label="省" required>' + selectOptions(Object.keys(regionOptions), selectedProvince, '请选择') + '</select></label>',
+          '<label class="address-field"><span>市</span><select class="select" id="hotel-city" name="city" aria-label="市" required>' + selectOptions(cityValues, selectedCity, '请选择') + '</select></label>',
+          '<label class="address-field"><span>区</span><select class="select" id="hotel-district" name="district" aria-label="区" required>' + selectOptions(districtValues, selectedDistrict, '请选择') + '</select></label>',
+          '</div>',
+          '<div class="address-detail"><input class="input" id="hotel-detail-address" name="detailAddress" value="' + escapeHTML(selectedDetailAddress) + '" placeholder="请输入详细地址，如街道、门牌号" aria-label="详细地址" required></div>',
+          '<span class="field-error" id="hotel-address-error">请选择省、市、区并填写详细地址</span></div>',
+          '</section>',
+          '<div class="button-stack"><button class="primary-btn" type="submit">' + (isCreatingFirstHotel ? '创建酒店并完成登录' : '保存酒店') + '</button>',
+          isCreatingFirstHotel ? '<button class="secondary-btn" type="button" data-action="cancel-onboarding">暂不创建，返回首页</button>' : '',
+          '</div>',
+          '</form></div>',
+          '</main>'
+        ].join('');
+      }
+
+      function inputField(label, name, value, placeholder) {
+        return [
+          '<div class="form-group"><label class="form-label" for="' + name + '">' + label + '</label>',
+          '<input class="input" id="' + name + '" name="' + name + '" value="' + escapeHTML(value || '') + '" placeholder="' + placeholder + '"></div>'
+        ].join('');
+      }
+
+      function textareaField(label, name, value, placeholder) {
+        return [
+          '<div class="form-group"><label class="form-label" for="' + name + '">' + label + '</label>',
+          '<textarea class="textarea" id="' + name + '" name="' + name + '" placeholder="' + placeholder + '">' + escapeHTML(value || '') + '</textarea></div>'
+        ].join('');
+      }
+
+      function pageContext() {
+        var hotel = getCurrentHotel();
+        var context = state.contexts[state.currentHotelId] || {};
+        return [
+          '<main class="screen" data-screen-label="酒店 Context">',
+          pageTop('酒店 Context'),
+          '<div class="scroll"><form class="page-body" id="context-form">',
+          '<div class="page-intro"><h2>公共酒店资料</h2><p>' + escapeHTML(hotel.name) + '的公共资料，可按需提供给已开通应用。</p></div>',
+          '<section class="panel">',
+          '<div class="context-section"><h3 class="context-title">基础信息</h3>',
+          textareaField('酒店介绍', 'hotelIntro', context.hotelIntro, '补充酒店介绍'),
+          inputField('联系方式', 'contact', context.contact, '补充酒店联系方式'),
+          '</div>',
+          '<div class="context-section"><h3 class="context-title">营销信息</h3>',
+          inputField('品牌色', 'brandColor', context.brandColor, '补充酒店品牌色'),
+          inputField('主推房型', 'featuredRoom', context.featuredRoom, '补充主推房型'),
+          textareaField('酒店卖点', 'sellingPoints', context.sellingPoints, '补充酒店卖点'),
+          inputField('常用二维码', 'commonQr', context.commonQr, '补充二维码说明'),
+          inputField('常用宣传语', 'slogan', context.slogan, '补充常用宣传语'),
+          inputField('内容风格偏好', 'contentStyle', context.contentStyle, '补充内容风格偏好'),
+          '</div>',
+          '<div class="context-section"><h3 class="context-title">服务信息</h3>',
+          textareaField('酒店设施', 'facilities', context.facilities, '补充酒店设施'),
+          textareaField('酒店服务', 'services', context.services, '补充酒店服务'),
+          inputField('入住时间', 'checkIn', context.checkIn, '补充入住时间'),
+          inputField('退房时间', 'checkOut', context.checkOut, '补充退房时间'),
+          textareaField('早餐说明', 'breakfast', context.breakfast, '补充早餐说明'),
+          textareaField('停车说明', 'parking', context.parking, '补充停车说明'),
+          '</div>',
+          '</section>',
+          '<div class="button-stack"><button class="primary-btn" type="submit">保存酒店 Context</button></div>',
+          '</form></div>',
+          '</main>'
+        ].join('');
+      }
+
+      function pageAssets() {
+        var hotel = getCurrentHotel();
+        var isQrTab = assetTab === 'qr';
+        var assets = (isQrTab ? transientQrAssets : transientAssets)[state.currentHotelId] || [];
+        var tabTitle = isQrTab ? '二维码' : '图片';
+        var uploadTitle = isQrTab ? '上传二维码' : '上传图片';
+        var emptyTitle = isQrTab ? '还没有二维码素材' : '还没有图片素材';
+        return [
+          '<main class="screen" data-screen-label="酒店素材库">',
+          pageTop('酒店素材库'),
+          '<div class="scroll"><div class="page-body">',
+          '<div class="page-intro"><h2>共享素材</h2><p>' + escapeHTML(hotel.name) + '的' + tabTitle + '素材，可供应用按需读取。</p></div>',
+          '<div class="asset-tabs" role="tablist" aria-label="素材类型">',
+          '<button class="asset-tab ' + (!isQrTab ? 'active' : '') + '" type="button" data-action="assets-tab" data-tab="images" role="tab" aria-selected="' + (!isQrTab) + '">图片</button>',
+          '<button class="asset-tab" type="button" disabled aria-disabled="true" role="tab" aria-selected="false">视频</button>',
+          '<button class="asset-tab ' + (isQrTab ? 'active' : '') + '" type="button" data-action="assets-tab" data-tab="qr" role="tab" aria-selected="' + isQrTab + '">二维码</button>',
+          '</div>',
+          '<label class="upload-box" for="asset-upload"><strong>' + uploadTitle + '</strong><small>支持选择本地图片并预览</small></label>',
+          '<input id="asset-upload" data-asset-kind="' + (isQrTab ? 'qr' : 'images') + '" type="file" accept="image/*" multiple hidden>',
+          assets.length ? '<div class="asset-grid">' + assets.map(function (asset, index) {
+            return '<article class="asset-card"><button class="asset-delete" type="button" data-action="delete-asset" data-asset-kind="' + (isQrTab ? 'qr' : 'images') + '" data-asset-index="' + index + '" aria-label="删除' + escapeHTML(asset.name) + '">删除</button><div class="asset-thumb"><img src="' + asset.url + '" alt=""></div><div class="asset-name">' + escapeHTML(asset.name) + '</div></article>';
+          }).join('') + '</div>' :
+            '<div class="panel empty"><span class="empty-mark">材</span><strong>' + emptyTitle + '</strong><p>上传后会保存在当前酒店，供应用按需使用。</p></div>',
+          '</div></div>',
+          '</main>'
+        ].join('');
+      }
+
+      function pageSubscriptions() {
+        var hotelApps = getHotelApps();
+        return [
+          '<main class="screen" data-screen-label="应用管理">',
+          pageTop('应用管理'),
+          '<div class="scroll"><div class="page-body">',
+          '<div class="page-intro"><h2>当前酒店应用</h2><p>按当前酒店查看应用开通状态，不展示组合套餐。</p></div>',
+          '<section class="panel">',
+          appCatalog.map(function (app) {
+            var appState = hotelApps[app.id] || { opened: false };
+            var extra = app.id === 'yingdian' && appState.opened ? '本月还可生成12次' : (appState.opened ? '应用已开通' : '当前不可使用');
+            return [
+              '<div class="subscription-row"><div class="subscription-main">',
+              '<span class="app-icon" style="' + appStyle(app) + '">' + app.glyph + '</span>',
+              '<span class="subscription-copy"><strong>' + app.name + '</strong><small>' + extra + '</small></span>',
+              '<span class="status-pill" style="' + appStyle(app) + '">' + (appState.opened ? '已开通' : '未开通') + '</span>',
+              '</div><div class="subscription-actions">',
+              '<button class="text-btn" type="button" data-action="' + (appState.opened ? 'open-app' : 'app-detail') + '" data-app-id="' + app.id + '">' + (appState.opened ? '进入应用' : '查看并开通') + '</button>',
+              '</div></div>'
+            ].join('');
+          }).join(''),
+          '</section>',
+          '</div></div>',
+          '</main>'
+        ].join('');
+      }
+
+      function pageOrders() {
+        var orders = state.orders.filter(function (order) {
+          return order.hotelId === state.currentHotelId;
+        });
+        return [
+          '<main class="screen" data-screen-label="应用订单">',
+          pageTop('应用订单'),
+          '<div class="scroll"><div class="page-body">',
+          '<div class="page-intro"><h2>购买记录</h2><p>这里只记录当前酒店的单个应用购买，不包含套餐。</p></div>',
+          orders.length ? '<section class="panel">' + orders.map(function (order) {
+            var app = getApp(order.appId);
+            return [
+              '<div class="order-row"><div class="order-main">',
+              '<span class="app-icon" style="' + appStyle(app) + '">' + app.glyph + '</span>',
+              '<span class="order-copy"><strong>' + app.name + '</strong><small>原型演示订单 · ' + order.createdLabel + '</small></span>',
+              '<span class="status-pill" style="' + appStyle(app) + '">开通成功</span>',
+              '</div></div>'
+            ].join('');
+          }).join('') + '</section>' :
+            '<section class="panel empty"><span class="empty-mark">单</span><strong>暂无购买记录</strong><p>开通单个应用后，原型订单会显示在这里。</p></section>',
+          '</div></div>',
+          '</main>'
+        ].join('');
+      }
+
+      function pageCustomer() {
+        var pattern = [
+          1,1,1,0,1,0,1,1,1,
+          1,0,1,0,0,1,1,0,1,
+          1,1,1,1,0,0,1,1,1,
+          0,1,0,1,1,0,0,1,0,
+          1,0,1,0,1,1,1,0,1,
+          0,1,0,1,0,0,1,1,0,
+          1,1,1,0,1,1,1,1,1,
+          1,0,1,1,0,1,1,0,1,
+          1,1,1,0,1,0,1,1,1
+        ];
+        return [
+          '<main class="screen" data-screen-label="客服与设置">',
+          pageTop('客服与设置'),
+          '<div class="scroll"><div class="page-body">',
+          '<div class="page-intro"><h2>企业微信客服</h2><p>保存或识别企业微信二维码，联系酒店AI助手客服。</p></div>',
+          '<section class="panel"><div class="qr-wrap">',
+          '<div class="qr-placeholder" aria-label="企业微信二维码待替换">',
+          pattern.map(function (cell) { return '<span class="qr-cell ' + (cell ? 'dark' : '') + '"></span>'; }).join(''),
+          '</div><p class="qr-label">企业微信二维码待替换</p>',
+          '</div><button class="secondary-btn" type="button" data-action="save-qr">保存二维码</button></section>',
+          '<section class="panel"><h3 class="panel-title">账号设置</h3>',
+          '<div class="hotel-row"><span class="menu-icon">号</span><span class="hotel-row-copy"><strong>当前登录方式</strong><small>微信授权登录</small></span></div>',
+          '<div class="button-stack"><button class="danger-btn" type="button" data-action="logout">退出登录</button></div>',
+          '</section>',
+          '</div></div>',
+          '</main>'
+        ].join('');
+      }
+
+      function pageAppDetail() {
+        var app = getApp(selectedAppId) || appCatalog[0];
+        var appState = getHotelApps()[app.id] || { opened: false };
+        return [
+          '<main class="screen" data-screen-label="应用介绍与购买">',
+          pageTop(app.name),
+          '<div class="scroll">',
+          '<section class="app-detail-hero">',
+          '<span class="app-detail-icon" style="' + appStyle(app) + '">' + app.glyph + '</span>',
+          '<h2>' + app.name + '</h2><p>' + app.intro + '</p>',
+          '<div class="prototype-note">MVP只展示应用摘要简介。应用未开通时不能进入业务功能；本原型不展示真实周期与金额。</div>',
+          '</section>',
+          '<div class="page-body">',
+          '<section class="panel"><h3 class="panel-title">当前状态</h3>',
+          '<div class="hotel-row"><span class="menu-icon">店</span><span class="hotel-row-copy"><strong>' + escapeHTML(getCurrentHotel().name) + '</strong><small>应用权益归属于当前酒店</small></span>',
+          '<span class="status-pill" style="' + appStyle(app) + '">' + (appState.opened ? '已开通' : '未开通') + '</span></div>',
+          '</section>',
+          '<div class="button-stack">',
+          appState.opened ?
+            '<button class="primary-btn" type="button" data-action="open-app" data-app-id="' + app.id + '">进入应用</button>' :
+            '<button class="primary-btn" type="button" data-action="open-purchase-sheet" data-app-id="' + app.id + '">立即开通</button>',
+          '<button class="secondary-btn" type="button" data-action="back">返回</button>',
+          '</div>',
+          '</div></div>',
+          '</main>'
+        ].join('');
+      }
+
+      function pageLogin() {
+        var reason = loginReason(pendingAuthAction);
+        return [
+          '<main class="screen" data-screen-label="微信授权登录">',
+          '<div class="login-screen">',
+          '<button class="login-back" type="button" data-action="cancel-login" aria-label="返回"><span class="arrow-left"></span></button>',
+          '<section class="login-brand"><span class="login-logo">AI</span><h1>登录酒店AI助手</h1>',
+          '<p>使用微信授权登录，继续管理酒店与应用。</p>',
+          '<div class="login-reason"><strong>' + reason[0] + '</strong>' + reason[1] + '</div></section>',
+          '<section><button class="wechat-btn" type="button" data-action="wechat-login">微信授权登录</button>',
+          '<button class="login-later" type="button" data-action="cancel-login">暂不登录</button>',
+          '<p class="login-note">登录即表示你同意相关服务协议与隐私政策<br>原型演示：点击后模拟微信授权成功。</p></section>',
+          '</div></main>'
+        ].join('');
+      }
+
+      function pageNoHotel() {
+        return [
+          '<main class="screen" data-screen-label="无酒店">',
+          '<div class="scroll"><div class="page-body">',
+          '<section class="panel empty"><span class="empty-mark">店</span><strong>还没有建立酒店</strong><p>先填写酒店名称、地址和可选Logo。</p>',
+          '<div class="button-stack" style="width:100%"><button class="primary-btn" type="button" data-action="add-hotel">建立第一家酒店</button></div>',
+          '</section></div></div>',
+          '</main>'
+        ].join('');
+      }
+
+      function renderHotelSheet() {
+        var currentId = state.currentHotelId;
+        return [
+          '<div class="overlay" id="hotel-sheet" data-overlay="hotel">',
+          '<section class="sheet" role="dialog" aria-modal="true" aria-label="切换酒店">',
+          '<div class="sheet-handle"></div><div class="sheet-head"><h3>切换当前酒店</h3>',
+          '<button class="icon-btn" type="button" data-action="close-overlay" aria-label="关闭"><span class="close-x"></span></button></div>',
+          state.hotels.map(function (hotel) {
+            return [
+              '<button class="sheet-hotel ' + (hotel.id === currentId ? 'current' : '') + '" type="button" data-action="switch-hotel" data-hotel-id="' + hotel.id + '">',
+              hotelMark(hotel),
+              '<span class="sheet-hotel-copy"><strong>' + escapeHTML(hotel.name) + '</strong><small>' + escapeHTML(hotel.address) + '</small></span>',
+              hotel.id === currentId ? '<span class="sheet-current">当前</span>' : '<span class="mini-arrow"></span>',
+              '</button>'
+            ].join('');
+          }).join(''),
+          '<div class="button-stack"><button class="secondary-btn" type="button" data-action="open-hotel-management">管理酒店</button></div>',
+          '</section></div>'
+        ].join('');
+      }
+
+      function renderPurchaseSheet() {
+        var app = getApp(selectedAppId);
+        if (!app) return '';
+        return [
+          '<div class="overlay" id="purchase-sheet" data-overlay="purchase">',
+          '<section class="sheet" role="dialog" aria-modal="true" aria-label="确认开通应用">',
+          '<div class="sheet-handle"></div><div class="sheet-head"><h3>确认开通</h3>',
+          '<button class="icon-btn" type="button" data-action="close-overlay" aria-label="关闭"><span class="close-x"></span></button></div>',
+          '<p class="confirm-copy">将为“' + escapeHTML(getCurrentHotel().name) + '”开通' + app.name + '。本原型暂不展示购买周期和支付金额。</p>',
+          '<div class="button-stack"><button class="primary-btn" type="button" data-action="confirm-purchase" data-app-id="' + app.id + '">确认开通（原型演示）</button>',
+          '<button class="secondary-btn" type="button" data-action="close-overlay">取消</button></div>',
+          '</section></div>'
+        ].join('');
+      }
+
+      function renderConfirmSheet(type) {
+        var isLogout = type === 'logout';
+        return [
+          '<div class="overlay" id="confirm-sheet" data-overlay="confirm">',
+          '<section class="sheet" role="dialog" aria-modal="true">',
+          '<div class="sheet-handle"></div><div class="sheet-head"><h3>' + (isLogout ? '退出登录' : '确认操作') + '</h3>',
+          '<button class="icon-btn" type="button" data-action="close-overlay" aria-label="关闭"><span class="close-x"></span></button></div>',
+          '<p class="confirm-copy">' + (isLogout ? '退出后可以再次使用微信授权登录。' : '') + '</p>',
+          '<div class="button-stack"><button class="' + (isLogout ? 'danger-btn' : 'primary-btn') + '" type="button" data-action="confirm-logout">确认退出</button>',
+          '<button class="secondary-btn" type="button" data-action="close-overlay">取消</button></div>',
+          '</section></div>'
+        ].join('');
+      }
+
+      function renderPage() {
+        switch (state.currentPage) {
+          case 'login': return pageLogin();
+          case 'mine': return pageMine();
+          case 'hotel-management': return pageHotelManagement();
+          case 'hotel-form': return pageHotelForm();
+          case 'assets': return pageAssets();
+          case 'subscriptions': return pageSubscriptions();
+          case 'orders': return pageOrders();
+          case 'customer': return pageCustomer();
+          case 'app-detail': return pageAppDetail();
+          case 'home':
+          default: return pageHome();
+        }
+      }
+
+      function render() {
+        var root = document.getElementById('app');
+        root.innerHTML = renderPage() + renderHotelSheet() + renderPurchaseSheet() + renderConfirmSheet('logout') + '<div class="toast" id="toast" role="status" aria-live="polite"></div>';
+        var prototypeTools = document.getElementById('prototype-tools');
+        prototypeTools.hidden = false;
+        prototypeTools.innerHTML = demoStateControls();
+        bindDirectEvents();
+        var activeRoute = state.currentPage || 'home';
+        if (window.location.hash.slice(1) !== activeRoute) {
+          history.replaceState(null, '', '#' + activeRoute);
+        }
+      }
+
+      function openOverlay(id) {
+        var overlay = document.getElementById(id);
+        if (overlay) window.requestAnimationFrame(function () { overlay.classList.add('open'); });
+      }
+
+      function closeOverlays() {
+        document.querySelectorAll('.overlay.open').forEach(function (overlay) {
+          overlay.classList.remove('open');
+        });
+      }
+
+      function switchHotel(hotelId) {
+        if (hotelId === state.currentHotelId) {
+          closeOverlays();
+          showToast('当前正在使用该酒店');
+          return;
+        }
+        var hotel = state.hotels.find(function (item) { return item.id === hotelId; });
+        if (!hotel) return;
+        state.currentHotelId = hotelId;
+        if (!state.hotelApps[hotelId]) state.hotelApps[hotelId] = createHotelApps();
+        if (!state.contexts[hotelId]) state.contexts[hotelId] = {};
+        saveState();
+        closeOverlays();
+        render();
+        showToast('已切换至' + hotel.name);
+      }
+
+      function bindDirectEvents() {
+        var hotelForm = document.getElementById('hotel-form');
+        if (hotelForm) hotelForm.addEventListener('submit', saveHotelForm);
+        var provinceSelect = document.getElementById('hotel-province');
+        var citySelect = document.getElementById('hotel-city');
+        var districtSelect = document.getElementById('hotel-district');
+        if (provinceSelect && citySelect && districtSelect) {
+          provinceSelect.addEventListener('change', function () {
+            var cities = regionOptions[provinceSelect.value] ? Object.keys(regionOptions[provinceSelect.value]) : [];
+            citySelect.innerHTML = selectOptions(cities, '', '请选择');
+            districtSelect.innerHTML = selectOptions([], '', '请选择');
+          });
+          citySelect.addEventListener('change', function () {
+            var districts = regionOptions[provinceSelect.value] && regionOptions[provinceSelect.value][citySelect.value] ? regionOptions[provinceSelect.value][citySelect.value] : [];
+            districtSelect.innerHTML = selectOptions(districts, '', '请选择');
+          });
+        }
+        var logoInput = document.getElementById('hotel-logo');
+        if (logoInput) logoInput.addEventListener('change', previewHotelLogo);
+        var contextForm = document.getElementById('context-form');
+        if (contextForm) contextForm.addEventListener('submit', saveContext);
+        var assetUpload = document.getElementById('asset-upload');
+        if (assetUpload) assetUpload.addEventListener('change', uploadAssets);
+      }
+
+      function previewHotelLogo(event) {
+        var file = event.target.files && event.target.files[0];
+        if (!file) return;
+        var reader = new FileReader();
+        reader.onload = function () {
+          pendingLogoData = reader.result;
+          var preview = document.getElementById('logo-preview');
+          if (preview) preview.innerHTML = '<img src="' + pendingLogoData + '" alt="Logo预览">';
+        };
+        reader.readAsDataURL(file);
+      }
+
+      function saveHotelForm(event) {
+        event.preventDefault();
+        var formData = new FormData(event.currentTarget);
+        var name = String(formData.get('name') || '').trim();
+        var province = String(formData.get('province') || '').trim();
+        var city = String(formData.get('city') || '').trim();
+        var district = String(formData.get('district') || '').trim();
+        var detailAddress = String(formData.get('detailAddress') || '').trim();
+        var address = province + city + district + detailAddress;
+        var hasCompleteAddress = Boolean(province && city && district && detailAddress);
+        document.getElementById('hotel-name-error').classList.toggle('show', !name);
+        document.getElementById('hotel-address-error').classList.toggle('show', !hasCompleteAddress);
+        if (!name || !hasCompleteAddress) {
+          showToast('请先完成必填信息');
+          return;
+        }
+        if (isCreatingFirstHotel) {
+          var firstHotelId = 'hotel-' + Date.now();
+          state.hotels = [{ id: firstHotelId, name: name, province: province, city: city, district: district, detailAddress: detailAddress, address: address, logo: pendingLogoData || '' }];
+          state.currentHotelId = firstHotelId;
+          state.hotelApps = {};
+          state.hotelApps[firstHotelId] = createHotelApps();
+          state.contexts = {};
+          state.contexts[firstHotelId] = {};
+          state.orders = [];
+          state.isWechatAuthorized = true;
+          state.hasCompletedOnboarding = true;
+          state.isLoggedIn = true;
+          saveState();
+          isCreatingFirstHotel = false;
+          editingHotelId = null;
+          pendingLogoData = '';
+          pendingAuthAction = null;
+          routeStack = [];
+          navigate('home', { replace: true });
+          window.setTimeout(function () { showToast('酒店已创建，登录成功'); }, 20);
+          return;
+        }
+        if (editingHotelId) {
+          var hotel = state.hotels.find(function (item) { return item.id === editingHotelId; });
+          hotel.name = name;
+          hotel.province = province;
+          hotel.city = city;
+          hotel.district = district;
+          hotel.detailAddress = detailAddress;
+          hotel.address = address;
+          hotel.logo = pendingLogoData || hotel.logo || '';
+          saveState();
+          editingHotelId = null;
+          pendingLogoData = '';
+          if (routeStack[routeStack.length - 1] === 'hotel-management') routeStack.pop();
+          navigate('hotel-management', { replace: true });
+          showToast('酒店资料已保存');
+          return;
+        }
+        var newId = 'hotel-' + Date.now();
+        state.hotels.push({ id: newId, name: name, province: province, city: city, district: district, detailAddress: detailAddress, address: address, logo: pendingLogoData || '' });
+        state.hotelApps[newId] = createHotelApps();
+        state.contexts[newId] = {};
+        saveState();
+        editingHotelId = null;
+        pendingLogoData = '';
+        if (routeStack[routeStack.length - 1] === 'hotel-management') routeStack.pop();
+        navigate('hotel-management', { replace: true });
+        showToast('酒店已新增，可切换后使用');
+      }
+
+      function saveContext(event) {
+        event.preventDefault();
+        var formData = new FormData(event.currentTarget);
+        var context = {};
+        formData.forEach(function (value, key) { context[key] = String(value).trim(); });
+        state.contexts[state.currentHotelId] = context;
+        saveState();
+        showToast('酒店 Context 已保存');
+      }
+
+      function uploadAssets(event) {
+        var files = Array.prototype.slice.call(event.target.files || []);
+        if (!files.length) return;
+        var isQrUpload = event.currentTarget.dataset.assetKind === 'qr';
+        var assetStore = isQrUpload ? transientQrAssets : transientAssets;
+        if (!assetStore[state.currentHotelId]) assetStore[state.currentHotelId] = [];
+        var remaining = files.length;
+        files.forEach(function (file) {
+          var reader = new FileReader();
+          reader.onload = function () {
+            assetStore[state.currentHotelId].push({ name: file.name, url: reader.result });
+            remaining -= 1;
+            if (remaining === 0) {
+              render();
+              showToast((isQrUpload ? '二维码' : '图片') + '已加入当前酒店');
+            }
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+
+      document.addEventListener('click', function (event) {
+        var target = event.target.closest('[data-action]');
+        if (!target) {
+          if (event.target.classList.contains('overlay')) closeOverlays();
+          return;
+        }
+        var action = target.dataset.action;
+        if (action === 'back') return goBack();
+        if (action === 'nav-home') return navigate('home');
+        if (action === 'nav-mine') return navigate('mine');
+        if (action === 'navigate') {
+          if (requireLogin({ type: 'mine-page', page: target.dataset.page })) return;
+          return navigate(target.dataset.page);
+        }
+        if (action === 'set-demo-state') {
+          demoHomeState = target.dataset.demoState || 'both';
+          return render();
+        }
+        if (action === 'demo-first-login') {
+          state = clone(defaultState);
+          isCreatingFirstHotel = false;
+          editingHotelId = null;
+          pendingLogoData = '';
+          pendingAuthAction = { type: 'continue' };
+          pageBeforeLogin = 'home';
+          routeStack = [];
+          state.currentPage = 'login';
+          window.location.hash = 'login';
+          return render();
+        }
+        if (action === 'demo-returning-login') {
+          if (!state.hotels.length) state.hotels = clone(defaultState.hotels);
+          state.currentHotelId = state.hotels[0].id;
+          if (!state.hotelApps[state.currentHotelId]) state.hotelApps[state.currentHotelId] = createHotelApps();
+          state.isWechatAuthorized = false;
+          state.hasCompletedOnboarding = true;
+          state.isLoggedIn = false;
+          isCreatingFirstHotel = false;
+          pendingAuthAction = { type: 'continue' };
+          pageBeforeLogin = 'home';
+          routeStack = [];
+          state.currentPage = 'login';
+          window.location.hash = 'login';
+          return render();
+        }
+        if (action === 'open-hotel-sheet') {
+          if (requireLogin({ type: 'hotel-sheet', returnPage: state.currentPage })) return;
+          return openOverlay('hotel-sheet');
+        }
+        if (action === 'close-overlay') return closeOverlays();
+        if (action === 'switch-hotel') return switchHotel(target.dataset.hotelId);
+        if (action === 'open-hotel-management') {
+          closeOverlays();
+          return navigate('hotel-management');
+        }
+        if (action === 'add-hotel') {
+          editingHotelId = null;
+          pendingLogoData = '';
+          return navigate('hotel-form');
+        }
+        if (action === 'edit-hotel') {
+          editingHotelId = target.dataset.hotelId;
+          pendingLogoData = '';
+          return navigate('hotel-form');
+        }
+        if (action === 'app-detail') {
+          if (requireLogin({ type: 'app-detail', appId: target.dataset.appId })) return;
+          selectedAppId = target.dataset.appId;
+          return navigate('app-detail');
+        }
+        if (action === 'assets-tab') {
+          assetTab = target.dataset.tab === 'qr' ? 'qr' : 'images';
+          return render();
+        }
+        if (action === 'delete-asset') {
+          var deleteKind = target.dataset.assetKind === 'qr' ? 'qr' : 'images';
+          var deleteStore = deleteKind === 'qr' ? transientQrAssets : transientAssets;
+          var deleteList = deleteStore[state.currentHotelId] || [];
+          var deleteIndex = Number(target.dataset.assetIndex);
+          if (deleteIndex >= 0 && deleteIndex < deleteList.length) {
+            deleteList.splice(deleteIndex, 1);
+            render();
+            showToast('素材已删除');
+          }
+          return;
+        }
+        if (action === 'open-purchase-sheet') {
+          selectedAppId = target.dataset.appId;
+          return openOverlay('purchase-sheet');
+        }
+        if (action === 'confirm-purchase') {
+          var purchaseId = target.dataset.appId;
+          getHotelApps()[purchaseId] = { opened: true, messageRead: false };
+          state.orders.unshift({
+            id: 'order-' + Date.now(),
+            hotelId: state.currentHotelId,
+            appId: purchaseId,
+            createdLabel: '刚刚'
+          });
+          saveState();
+          closeOverlays();
+          render();
+          showToast(getApp(purchaseId).name + '已开通（原型演示）');
+          return;
+        }
+        if (action === 'open-app') {
+          if (requireLogin({ type: 'app-detail', appId: target.dataset.appId })) return;
+          return showToast('原型演示：将进入' + getApp(target.dataset.appId).name);
+        }
+        if (action === 'open-task') {
+          if (requireLogin({ type: 'app-task', appId: target.dataset.appId })) return;
+          return showToast('原型演示：将进入' + getApp(target.dataset.appId).name + '处理任务');
+        }
+        if (action === 'read-message') {
+          getHotelApps()[target.dataset.appId].messageRead = true;
+          saveState();
+          render();
+          showToast('消息已读，任务状态不受影响');
+          return;
+        }
+        if (action === 'save-qr') {
+          return showToast('原型演示：企业微信二维码待替换');
+        }
+        if (action === 'logout') return openOverlay('confirm-sheet');
+        if (action === 'confirm-logout') {
+          closeOverlays();
+          routeStack = [];
+          state.isLoggedIn = false;
+          pendingAuthAction = null;
+          state.currentPage = 'home';
+          saveState();
+          render();
+          showToast('已退出登录');
+          return;
+        }
+        if (action === 'cancel-login') {
+          pendingAuthAction = null;
+          routeStack = [];
+          state.currentPage = pageBeforeLogin || 'home';
+          window.location.hash = state.currentPage;
+          return render();
+        }
+        if (action === 'cancel-onboarding') {
+          isCreatingFirstHotel = false;
+          state.isWechatAuthorized = false;
+          state.isLoggedIn = false;
+          state.hasCompletedOnboarding = false;
+          pendingAuthAction = null;
+          routeStack = [];
+          state.currentPage = 'home';
+          window.location.hash = 'home';
+          return render();
+        }
+        if (action === 'wechat-login') {
+          target.disabled = true;
+          target.innerHTML = '<span class="spinner"></span> 正在授权';
+          window.setTimeout(function () {
+            state.isWechatAuthorized = true;
+            if (!state.hasCompletedOnboarding) {
+              startFirstHotelCreation();
+              window.setTimeout(function () { showToast('微信授权成功，请创建酒店'); }, 20);
+              return;
+            }
+            if (!state.hotels.length) {
+              startFirstHotelCreation();
+              window.setTimeout(function () { showToast('请先创建至少一家酒店'); }, 20);
+              return;
+            }
+            state.isLoggedIn = true;
+            saveState();
+            continueAfterLogin();
+            window.setTimeout(function () { showToast('微信授权登录成功'); }, 20);
+          }, 650);
+        }
+      });
+
+      window.addEventListener('hashchange', function () {
+        var route = window.location.hash.slice(1);
+        var allowed = ['home', 'mine', 'hotel-management', 'hotel-form', 'assets', 'subscriptions', 'orders', 'customer', 'app-detail', 'login'];
+        if (allowed.indexOf(route) !== -1 && route !== state.currentPage) {
+          state.currentPage = route;
+          render();
+        }
+      });
+
+      render();
+    }());
+  </script>
+</body>
+</html>
