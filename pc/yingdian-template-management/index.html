@@ -41,9 +41,9 @@
         <section class="page-heading">
           <div>
             <h1>模板管理</h1>
-            <p class="page-description">上传参考图，通过模板反推形成信息维度，确认后再向用户发布。</p>
+            <p class="page-description">创建模板基础内容，通过反推形成信息维度，确认完整后再向用户发布。</p>
           </div>
-          <button class="button button-primary" type="button" data-open-upload>上传模板</button>
+          <button class="button button-primary" type="button" data-open-upload>创建模板</button>
         </section>
 
         <section class="table-panel" aria-labelledby="template-archive-title">
@@ -86,10 +86,10 @@
     <section class="modal-card upload-modal" role="dialog" aria-modal="true" aria-labelledby="upload-title">
       <header class="modal-header">
         <div>
-          <h2 id="upload-title">上传模板</h2>
+          <h2 id="upload-title">创建模板</h2>
           <p>提交后自动发起首次反推，仅生成模板信息维度，完成后需要运营人员确认覆盖。</p>
         </div>
-        <button class="close-button" type="button" data-close-upload aria-label="关闭上传模板弹窗">×</button>
+        <button class="close-button" type="button" data-close-upload aria-label="关闭创建模板弹窗">×</button>
       </header>
 
       <form id="upload-form" novalidate>
@@ -112,6 +112,12 @@
           </label>
         </div>
 
+        <label class="form-field upload-usage-field">
+          <span>模板使用说明 <i class="optional-label">选填</i></span>
+          <textarea id="template-usage-input" name="templateUsage" class="text-editor upload-usage-editor" placeholder="可填写模板适用场景、图片准备要求等说明"></textarea>
+          <small class="field-hint">创建后可在模板详情中独立维护，不影响信息维度修订。</small>
+        </label>
+
         <div class="form-field upload-field">
           <span>模板原始参考图 <b>*</b></span>
           <label class="upload-dropzone" for="template-image-input" id="upload-dropzone">
@@ -127,10 +133,10 @@
         </div>
 
         <footer class="modal-footer">
-          <p>首次反推不会自动发布模板。</p>
+          <p>使用说明不会由反推生成；首次反推仅生成信息维度，确认后才可发布模板。</p>
           <div class="button-row">
             <button class="button button-quiet" type="button" data-close-upload>取消</button>
-            <button class="button button-primary" type="submit" id="upload-submit">上传并开始反推</button>
+            <button class="button button-primary" type="submit" id="upload-submit">创建并开始反推</button>
           </div>
         </footer>
       </form>

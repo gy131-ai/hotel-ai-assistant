@@ -776,6 +776,29 @@ a {
   box-shadow: 0 0 0 3px rgba(50, 99, 217, 0.1);
 }
 
+.optional-label {
+  margin-left: 5px;
+  color: var(--muted);
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 500;
+}
+
+.field-hint {
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.upload-usage-field {
+  margin-top: 20px;
+}
+
+.upload-usage-editor {
+  min-height: 96px;
+  resize: vertical;
+}
+
 .upload-field {
   margin-top: 20px;
 }
@@ -1352,6 +1375,10 @@ a {
 .editing-column {
   display: grid;
   gap: 18px;
+}
+
+.detail-basic-grid {
+  gap: 14px;
 }
 
 .editor-panel {

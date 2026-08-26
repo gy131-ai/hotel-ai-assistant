@@ -11,6 +11,8 @@
   let selectedUploadImage = "";
   let selectedUploadFileName = "";
   let detailTemplateId = "";
+  let initialName = "";
+  let initialMaterial = "";
   let initialUsage = "";
   let initialMarkdown = "";
   let allowNavigation = false;
@@ -184,7 +186,8 @@
       pending: { label: "待处理", className: "pending" },
       processing: { label: "处理中", className: "processing" },
       success: { label: "成功", className: "success" },
-      failed: { label: "失败", className: "failed" }
+      failed: { label: "失败", className: "failed" },
+      "needs-inference": { label: "待重新反推", className: "pending" }
     };
     return values[template.inferenceStatus] || values.pending;
   }
@@ -272,7 +275,7 @@
     stateLayer.hidden = false;
 
     const states = {
-      empty: '<div class="state-card"><span class="state-glyph">＋</span><h3>还没有模板</h3><p>上传第一张模板参考图，完成反推确认后即可发布给用户。</p><button class="button button-primary" type="button" data-open-upload>上传模板</button></div>',
+      empty: '<div class="state-card"><span class="state-glyph">＋</span><h3>还没有模板</h3><p>创建第一个模板，完成信息维度反推确认后即可发布给用户。</p><button class="button button-primary" type="button" data-open-upload>创建模板</button></div>',
       loading: '<div class="state-card"><span class="state-glyph">·</span><h3>正在加载模板</h3><div class="loading-lines" aria-label="加载中"><i></i><i></i><i></i></div></div>',
       error: '<div class="state-card"><span class="state-glyph">!</span><h3>模板列表加载失败</h3><p>暂时无法取得模板数据，请稍后重试。</p><button class="button button-outline" type="button" data-demo-state="normal">重新加载</button></div>',
       forbidden: '<div class="state-card"><span class="state-glyph">×</span><h3>无权访问模板管理</h3><p>该模块仅向内部运营人员开放。</p></div>'
@@ -340,12 +343,18 @@
     poster.innerHTML = '<div class="poster-copy"><small>' + escapeHTML(template.material.toUpperCase()) + "</small><strong>" + escapeHTML(template.name) + "</strong></div>";
 
     const usageEditor = document.getElementById("usage-editor");
+    const nameInput = document.getElementById("detail-name-input");
+    const materialInput = document.getElementById("detail-material-input");
     const markdownEditor = document.getElementById("markdown-editor");
-    const shouldRefreshUsage = forceEditors || document.activeElement !== usageEditor && !isUsageDirty();
+    const shouldRefreshBasic = forceEditors || !isBasicDirty();
     const shouldRefreshMarkdown = forceEditors || document.activeElement !== markdownEditor && !isMarkdownDirty();
 
-    if (shouldRefreshUsage) {
+    if (shouldRefreshBasic) {
+      nameInput.value = template.name || "";
+      materialInput.value = template.material || "";
       usageEditor.value = template.usage || "";
+      initialName = nameInput.value;
+      initialMaterial = materialInput.value;
       initialUsage = usageEditor.value;
     }
     if (shouldRefreshMarkdown) {
@@ -385,6 +394,9 @@
     }
     if (template.inferenceStatus === "failed") {
       return "本次反推未完成，当前内容和发布状态未发生变化。";
+    }
+    if (template.inferenceStatus === "needs-inference") {
+      return "物料类型已修改，建议手动重新反推信息维度；当前模板内容仍可使用。";
     }
     return "最近一次反推已经完成，当前没有待确认结果。";
   }
@@ -483,8 +495,8 @@
       return;
     }
 
-    if (pageType === "detail" && (isUsageDirty() || isMarkdownDirty())) {
-      showToast("请先保存当前修改，再确认覆盖反推结果");
+    if (pageType === "detail" && (isBasicDirty() || isMarkdownDirty())) {
+      showToast("请先保存模板基础内容和信息维度，再确认覆盖反推结果");
       return;
     }
 
@@ -601,7 +613,7 @@
       return;
     }
     openConfirm({
-      title: "重新反推这个模板？",
+        title: "重新反推这个模板？",
       message: "系统会创建新的反推任务。完成后需要再次确认，确认前当前内容和发布状态保持不变。",
       confirmLabel: "开始反推",
       onConfirm: function () {
@@ -654,7 +666,7 @@
 
     openConfirm({
       title: action === "republish" ? "重新发布这个模板？" : "发布这个模板？",
-      message: "发布后，用户可以在模板创作入口选择该模板。模板使用说明不是发布必填项。",
+        message: "发布后，用户可以在模板创作入口选择该模板。模板使用说明为选填项。",
       confirmLabel: action === "republish" ? "重新发布" : "确认发布",
       onConfirm: function () {
         changePublishStatus(templateId, "published", action === "republish" ? "模板已重新发布" : "模板已发布");
@@ -768,6 +780,7 @@
   function submitUploadForm() {
     const nameInput = document.getElementById("template-name-input");
     const materialInput = document.getElementById("material-type-input");
+    const usageInput = document.getElementById("template-usage-input");
     const submitButton = document.getElementById("upload-submit");
     const name = nameInput.value.trim();
     const material = materialInput.value;
@@ -810,7 +823,7 @@
         revisionUpdatedAt: "",
         createdAt: formatNow(),
         updatedAt: formatNow(),
-        usage: "",
+        usage: usageInput ? usageInput.value.trim() : "",
         markdown: "",
         pendingResult: null,
         pendingKind: "initial"
@@ -821,7 +834,7 @@
       renderList();
       startInference(template.id, "initial");
       submitButton.disabled = false;
-      submitButton.textContent = "上传并开始反推";
+      submitButton.textContent = "创建并开始反推";
     }, 560);
   }
 
@@ -878,12 +891,16 @@
     detailTemplateId = query.get("id") || (firstTemplate ? firstTemplate.id : "");
     renderDetail(true);
 
+    const nameInput = document.getElementById("detail-name-input");
+    const materialInput = document.getElementById("detail-material-input");
     const usageEditor = document.getElementById("usage-editor");
     const markdownEditor = document.getElementById("markdown-editor");
+    nameInput.addEventListener("input", updateDirtyIndicators);
+    materialInput.addEventListener("input", updateDirtyIndicators);
     usageEditor.addEventListener("input", updateDirtyIndicators);
     markdownEditor.addEventListener("input", updateDirtyIndicators);
 
-    document.getElementById("save-usage").addEventListener("click", saveUsage);
+    document.getElementById("save-basic").addEventListener("click", saveBasicContent);
     document.getElementById("save-markdown").addEventListener("click", saveMarkdown);
     document.getElementById("task-review-action").addEventListener("click", function () {
       openResult(detailTemplateId);
@@ -895,7 +912,7 @@
       requestPublicationAction(detailTemplateId, event.currentTarget.dataset.action);
     });
     document.getElementById("detail-back").addEventListener("click", function (event) {
-      if (!isUsageDirty() && !isMarkdownDirty()) {
+      if (!isBasicDirty() && !isMarkdownDirty()) {
         return;
       }
       event.preventDefault();
@@ -912,7 +929,7 @@
     });
 
     window.addEventListener("beforeunload", function (event) {
-      if (allowNavigation || !isUsageDirty() && !isMarkdownDirty()) {
+      if (allowNavigation || !isBasicDirty() && !isMarkdownDirty()) {
         return;
       }
       event.preventDefault();
@@ -920,9 +937,14 @@
     });
   }
 
-  function isUsageDirty() {
-    const editor = document.getElementById("usage-editor");
-    return Boolean(editor && editor.value !== initialUsage);
+  function isBasicDirty() {
+    const nameInput = document.getElementById("detail-name-input");
+    const materialInput = document.getElementById("detail-material-input");
+    const usageEditor = document.getElementById("usage-editor");
+    return Boolean(
+      nameInput && materialInput && usageEditor &&
+      (nameInput.value !== initialName || materialInput.value !== initialMaterial || usageEditor.value !== initialUsage)
+    );
   }
 
   function isMarkdownDirty() {
@@ -931,11 +953,11 @@
   }
 
   function updateDirtyIndicators() {
-    const usageState = document.getElementById("usage-save-state");
+    const basicState = document.getElementById("basic-save-state");
     const markdownState = document.getElementById("markdown-save-state");
-    if (usageState) {
-      usageState.textContent = isUsageDirty() ? "有未保存修改" : "已保存";
-      usageState.classList.toggle("dirty", isUsageDirty());
+    if (basicState) {
+      basicState.textContent = isBasicDirty() ? "有未保存修改" : "已保存";
+      basicState.classList.toggle("dirty", isBasicDirty());
     }
     if (markdownState) {
       markdownState.textContent = isMarkdownDirty() ? "有未保存修改" : "已保存";
@@ -943,18 +965,47 @@
     }
   }
 
-  function saveUsage() {
+  function saveBasicContent() {
     const template = findTemplate(detailTemplateId);
+    const nameInput = document.getElementById("detail-name-input");
+    const materialInput = document.getElementById("detail-material-input");
     const editor = document.getElementById("usage-editor");
-    if (!template || !editor) {
+    if (!template || !nameInput || !materialInput || !editor) {
       return;
     }
-    template.usage = editor.value;
+    setFieldError("detailName", "");
+    setFieldError("detailMaterial", "");
+    const name = nameInput.value.trim();
+    const material = materialInput.value;
+    if (!name) {
+      setFieldError("detailName", "请输入模板名称");
+    }
+    if (!material) {
+      setFieldError("detailMaterial", "请选择物料类型");
+    }
+    if (!name || !material) {
+      showToast("请补充模板基础内容");
+      return;
+    }
+    const materialChanged = material !== template.material;
+    template.name = name;
+    template.material = material;
+    template.usage = editor.value.trim();
+    if (materialChanged) {
+      template.pendingResult = null;
+      template.pendingKind = null;
+      template.inferenceStatus = "needs-inference";
+    }
     template.updatedAt = formatNow();
+    initialName = name;
+    initialMaterial = material;
+    nameInput.value = name;
+    materialInput.value = material;
+    editor.value = template.usage;
     initialUsage = editor.value;
     persistTemplates();
     renderDetail(false);
-    showToast("模板使用说明已保存，信息维度修订号未变化");
+    showToast(materialChanged ? "模板基础内容已保存，请手动重新反推信息维度" : "模板基础内容已保存");
   }
 
   function saveMarkdown() {

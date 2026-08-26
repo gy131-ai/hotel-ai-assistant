@@ -98,22 +98,40 @@
             </article>
 
             <div class="editing-column">
-              <article class="editor-panel usage-editor-panel">
+              <article class="editor-panel basic-editor-panel">
                 <header class="content-heading">
                   <div>
-                    <h2>模板使用说明</h2>
+                    <h2>模板基础内容</h2>
                   </div>
-                  <span>小程序端展示</span>
+                  <span>运营端维护</span>
                 </header>
                 <div class="editor-body">
-                  <div class="editor-guidance">
-                    <p>该说明会展示在用户小程序端，由运营人员手动维护。选填，保存不会改变信息维度修订号。</p>
+                  <div class="form-grid detail-basic-grid">
+                    <label class="form-field">
+                      <span>模板名称 <b>*</b></span>
+                      <input id="detail-name-input" name="detailName" type="text" autocomplete="off" aria-label="模板名称">
+                      <small class="field-error" data-error-for="detailName"></small>
+                    </label>
+                    <label class="form-field">
+                      <span>物料类型 <b>*</b></span>
+                      <select id="detail-material-input" name="detailMaterial" aria-label="物料类型">
+                        <option value="">请选择物料类型</option>
+                        <option value="朋友圈海报">朋友圈海报</option>
+                        <option value="电子活动海报">电子活动海报</option>
+                        <option value="邀请函">邀请函</option>
+                      </select>
+                      <small class="field-error" data-error-for="detailMaterial"></small>
+                    </label>
                   </div>
-                  <textarea id="usage-editor" class="text-editor usage-editor" aria-label="模板使用说明" placeholder="可填写模板适用场景、图片准备要求等说明（选填）"></textarea>
+                  <div class="form-field">
+                    <span>模板使用说明 <i class="optional-label">选填</i></span>
+                    <textarea id="usage-editor" class="text-editor usage-editor" aria-label="模板使用说明" placeholder="可填写模板适用场景、图片准备要求等说明"></textarea>
+                    <small class="field-hint">该说明会展示在用户小程序端。保存不会改变信息维度修订号。</small>
+                  </div>
                 </div>
                 <footer class="editor-footer">
-                  <span id="usage-save-state">已保存</span>
-                  <button class="button button-outline" type="button" id="save-usage">保存使用说明</button>
+                  <span id="basic-save-state">已保存</span>
+                  <button class="button button-outline" type="button" id="save-basic">保存模板基础内容</button>
                 </footer>
               </article>
 
