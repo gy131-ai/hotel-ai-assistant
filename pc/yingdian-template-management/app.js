@@ -46,7 +46,6 @@
       usage: "适合早餐体验、餐饮活动或轻松生活方式主题。建议使用明亮的餐饮空间或食物主图。",
       markdown: "# 早餐慢时光\n\n## 模板定位\n- 物料类型：电子活动海报\n- 核心目标：传达轻松、明亮的早餐体验\n\n## 内容角色\n- 主标题：早餐主题\n- 辅助信息：活动时间与简要说明\n- 主图：早餐或餐饮空间\n\n## 视觉关系\n- 保留自然光和舒展留白\n- 信息层级从主题到活动说明",
       pendingResult: {
-        usage: "适合早餐体验、餐厅活动或晨间生活方式主题。优先准备自然光充足的餐饮空间或早餐主图，并使用简洁活动标题。",
         markdown: "# 早餐慢时光\n\n## 模板定位\n- 物料类型：电子活动海报\n- 核心目标：通过晨间光线与餐饮场景传达轻松体验\n\n## 内容角色\n- 主标题：早餐或晨间活动主题\n- 辅助信息：活动时间、地点与简要利益点\n- 主图：早餐餐台、餐厅空间或食物近景\n\n## 视觉关系\n- 主标题置于高留白区域\n- 主图保持自然光与空间纵深\n- 活动信息与标题建立清晰层级\n\n## 输出要求\n- 保持完整活动海报构图\n- 避免装饰元素遮挡核心食物或空间"
       },
       pendingKind: "reinference"
@@ -85,13 +84,17 @@
         if (Array.isArray(parsed)) {
           let needsMigration = false;
           memoryTemplates = parsed.map(function (template) {
-            if (typeof template.revisionUpdatedAt === "string") {
-              return template;
+            const normalized = Object.assign({}, template);
+            if (typeof normalized.revisionUpdatedAt !== "string") {
+              needsMigration = true;
+              normalized.revisionUpdatedAt = Number(normalized.revision || 0) > 0 ? normalized.updatedAt || normalized.createdAt || "" : "";
             }
-            needsMigration = true;
-            return Object.assign({}, template, {
-              revisionUpdatedAt: Number(template.revision || 0) > 0 ? template.updatedAt || template.createdAt || "" : ""
-            });
+            if (normalized.pendingResult && typeof normalized.pendingResult === "object" && Object.prototype.hasOwnProperty.call(normalized.pendingResult, "usage")) {
+              normalized.pendingResult = Object.assign({}, normalized.pendingResult);
+              delete normalized.pendingResult.usage;
+              needsMigration = true;
+            }
+            return normalized;
           });
           if (needsMigration) {
             persistTemplates();
@@ -372,7 +375,7 @@
 
   function taskDescription(template) {
     if (template.pendingResult) {
-      return "反推完成，新的模板信息等待确认。";
+      return "反推完成，新的模板信息维度等待确认覆盖。";
     }
     if (template.inferenceStatus === "pending") {
       return "反推任务已创建，等待处理。";
@@ -463,7 +466,6 @@
     activeResultId = templateId;
     setText("result-template-name", template.name);
     setText("result-current-revision", "当前信息维度修订号：" + formatRevision(template));
-    setText("candidate-usage", template.pendingResult.usage || "未生成模板使用说明");
     setText("candidate-markdown", template.pendingResult.markdown || "未生成模板信息维度");
     openModal("result-modal");
   }
@@ -486,7 +488,6 @@
       return;
     }
 
-    template.usage = template.pendingResult.usage || "";
     template.markdown = template.pendingResult.markdown || "";
     template.pendingResult = null;
     template.pendingKind = null;
@@ -510,7 +511,7 @@
     closeResult();
     openConfirm({
       title: "丢弃本次反推结果？",
-      message: "候选模板信息维度和模板使用说明会被直接丢弃，当前内容保持不变。",
+      message: "候选模板信息维度会被直接丢弃，当前内容和模板使用说明保持不变。",
       confirmLabel: "丢弃结果",
       danger: true,
       onConfirm: function () {
@@ -528,12 +529,6 @@
   }
 
   function buildCandidate(template) {
-    const materialNotes = {
-      "朋友圈海报": "适合朋友圈传播，建议使用一张主体明确的酒店图片，并提供一句清晰的宣传主题。",
-      "电子活动海报": "适合酒店活动推广，建议准备与活动直接相关的主图、活动主题和必要信息。",
-      "邀请函": "适合晚宴、会员活动或节日邀请，建议准备具有氛围感的场景图和清晰的邀请主题。"
-    };
-    const usage = materialNotes[template.material] || "请准备一张主体明确的模板主图，并提供简短、清晰的制作主题。";
     const markdown = "# " + template.name + "\n\n" +
       "## 模板定位\n" +
       "- 物料类型：" + template.material + "\n" +
@@ -549,7 +544,7 @@
       "## 输出要求\n" +
       "- 保持完整的" + template.material + "构图\n" +
       "- 文字、图片与装饰关系清晰";
-    return { usage: usage, markdown: markdown };
+    return { markdown: markdown };
   }
 
   function startInference(templateId, kind) {
@@ -592,7 +587,7 @@
       currentTemplate.updatedAt = formatNow();
       persistTemplates();
       renderCurrentPage(false);
-      showToast("反推完成，等待运营人员确认结果");
+      showToast("模板信息维度反推完成，等待运营人员确认覆盖");
     }, 2600);
   }
 

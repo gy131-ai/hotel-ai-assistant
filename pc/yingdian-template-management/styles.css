@@ -907,7 +907,7 @@ a {
 
 .result-grid {
   display: grid;
-  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.45fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 18px;
   padding: 22px 28px 2px;
 }

@@ -87,7 +87,7 @@
       <header class="modal-header">
         <div>
           <h2 id="upload-title">上传模板</h2>
-          <p>提交后自动发起首次反推，完成后需要运营人员确认结果。</p>
+          <p>提交后自动发起首次反推，仅生成模板信息维度，完成后需要运营人员确认覆盖。</p>
         </div>
         <button class="close-button" type="button" data-close-upload aria-label="关闭上传模板弹窗">×</button>
       </header>
@@ -155,8 +155,8 @@
     <section class="modal-card result-modal" role="dialog" aria-modal="true" aria-labelledby="result-title">
       <header class="modal-header">
         <div>
-          <h2 id="result-title">确认覆盖模板信息？</h2>
-          <p>确认前不会覆盖当前内容，也不会改变模板发布状态。</p>
+          <h2 id="result-title">确认覆盖模板信息维度？</h2>
+          <p>本次反推仅更新模板信息维度，不影响模板使用说明和模板发布状态。</p>
         </div>
         <button class="close-button" type="button" data-close-result aria-label="关闭反推结果">×</button>
       </header>
@@ -165,13 +165,6 @@
         <span id="result-current-revision"></span>
       </div>
       <div class="result-grid">
-        <section class="result-block">
-          <div class="result-block-title">
-            <h3>模板使用说明</h3>
-            <span>小程序端展示</span>
-          </div>
-          <p id="candidate-usage"></p>
-        </section>
         <section class="result-block markdown-result">
           <div class="result-block-title">
             <h3>模板信息维度</h3>
@@ -181,7 +174,7 @@
         </section>
       </div>
       <footer class="modal-footer result-footer">
-        <p>选择“丢弃结果”后，本次候选内容不会保留。</p>
+        <p>选择“丢弃结果”后，本次候选信息维度不会保留。</p>
         <div class="button-row">
           <button class="button button-danger-quiet" type="button" id="discard-result">丢弃结果</button>
           <button class="button button-primary" type="button" id="apply-result">确认覆盖</button>

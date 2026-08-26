@@ -107,9 +107,9 @@
                 </header>
                 <div class="editor-body">
                   <div class="editor-guidance">
-                    <p>该说明会展示在用户端，可直接修改。</p>
+                    <p>该说明会展示在用户小程序端，由运营人员手动维护。选填，保存不会改变信息维度修订号。</p>
                   </div>
-                  <textarea id="usage-editor" class="text-editor usage-editor" aria-label="模板使用说明" placeholder="反推确认后会生成使用说明，也可直接填写"></textarea>
+                  <textarea id="usage-editor" class="text-editor usage-editor" aria-label="模板使用说明" placeholder="可填写模板适用场景、图片准备要求等说明（选填）"></textarea>
                 </div>
                 <footer class="editor-footer">
                   <span id="usage-save-state">已保存</span>
@@ -163,8 +163,8 @@
     <section class="modal-card result-modal" role="dialog" aria-modal="true" aria-labelledby="result-title">
       <header class="modal-header">
         <div>
-          <h2 id="result-title">确认覆盖模板信息？</h2>
-          <p>确认前不会覆盖当前内容，也不会改变模板发布状态。</p>
+          <h2 id="result-title">确认覆盖模板信息维度？</h2>
+          <p>本次反推仅更新模板信息维度，不影响模板使用说明和模板发布状态。</p>
         </div>
         <button class="close-button" type="button" data-close-result aria-label="关闭反推结果">×</button>
       </header>
@@ -173,13 +173,6 @@
         <span id="result-current-revision"></span>
       </div>
       <div class="result-grid">
-        <section class="result-block">
-          <div class="result-block-title">
-            <h3>模板使用说明</h3>
-            <span>小程序端展示</span>
-          </div>
-          <p id="candidate-usage"></p>
-        </section>
         <section class="result-block markdown-result">
           <div class="result-block-title">
             <h3>模板信息维度</h3>
@@ -189,7 +182,7 @@
         </section>
       </div>
       <footer class="modal-footer result-footer">
-        <p>选择“丢弃结果”后，本次候选内容不会保留。</p>
+        <p>选择“丢弃结果”后，本次候选信息维度不会保留。</p>
         <div class="button-row">
           <button class="button button-danger-quiet" type="button" id="discard-result">丢弃结果</button>
           <button class="button button-primary" type="button" id="apply-result">确认覆盖</button>
