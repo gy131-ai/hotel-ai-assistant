@@ -1390,40 +1390,6 @@
     .upload-box strong { font-size: 13px; }
     .upload-box small { margin-top: 6px; color: var(--ink-soft); font-size: 9px; }
 
-    .asset-tabs {
-      margin: 0 0 14px;
-      padding: 3px;
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 3px;
-      border-radius: 13px;
-      background: var(--surface-soft);
-    }
-
-    .asset-tab {
-      min-height: 38px;
-      padding: 0 12px;
-      border: 0;
-      border-radius: 10px;
-      color: var(--muted);
-      background: transparent;
-      font-size: 11px;
-      font-weight: 720;
-      cursor: pointer;
-    }
-
-    .asset-tab.active {
-      color: var(--ink);
-      background: var(--surface);
-      box-shadow: 0 4px 12px rgba(23, 50, 83, 0.08);
-    }
-
-    .asset-tab:disabled {
-      color: #b3bcc9;
-      background: transparent;
-      cursor: not-allowed;
-    }
-
     .asset-grid {
       margin-top: 14px;
       display: grid;
@@ -1938,9 +1904,6 @@
       var isCreatingFirstHotel = false;
       var pendingLogoData = '';
       var transientAssets = {};
-      var transientQrAssets = {};
-      var transientVideoAssets = {};
-      var assetTab = 'images';
       var demoHomeState = 'both';
 
       var appCatalog = [
@@ -2537,27 +2500,18 @@
 
       function pageAssets() {
         var hotel = getCurrentHotel();
-        var isQrTab = assetTab === 'qr';
-        var assets = (isQrTab ? transientQrAssets : transientAssets)[state.currentHotelId] || [];
-        var tabTitle = isQrTab ? '二维码' : '图片';
-        var uploadTitle = isQrTab ? '上传二维码' : '上传图片';
-        var emptyTitle = isQrTab ? '还没有二维码素材' : '还没有图片素材';
+        var assets = transientAssets[state.currentHotelId] || [];
         return [
           '<main class="screen" data-screen-label="酒店素材库">',
           pageTop('酒店素材库'),
           '<div class="scroll"><div class="page-body">',
-          '<div class="page-intro"><h2>共享素材</h2><p>' + escapeHTML(hotel.name) + '的' + tabTitle + '素材，可供应用按需读取。</p></div>',
-          '<div class="asset-tabs" role="tablist" aria-label="素材类型">',
-          '<button class="asset-tab ' + (!isQrTab ? 'active' : '') + '" type="button" data-action="assets-tab" data-tab="images" role="tab" aria-selected="' + (!isQrTab) + '">图片</button>',
-          '<button class="asset-tab" type="button" disabled aria-disabled="true" role="tab" aria-selected="false">视频</button>',
-          '<button class="asset-tab ' + (isQrTab ? 'active' : '') + '" type="button" data-action="assets-tab" data-tab="qr" role="tab" aria-selected="' + isQrTab + '">二维码</button>',
-          '</div>',
-          '<label class="upload-box" for="asset-upload"><strong>' + uploadTitle + '</strong><small>支持选择本地图片并预览</small></label>',
-          '<input id="asset-upload" data-asset-kind="' + (isQrTab ? 'qr' : 'images') + '" type="file" accept="image/*" multiple hidden>',
+          '<div class="page-intro"><h2>共享图片</h2><p>' + escapeHTML(hotel.name) + '的图片素材，可供应用按需读取。</p></div>',
+          '<label class="upload-box" for="asset-upload"><strong>上传图片</strong><small>支持选择本地图片并预览</small></label>',
+          '<input id="asset-upload" type="file" accept="image/*" multiple hidden>',
           assets.length ? '<div class="asset-grid">' + assets.map(function (asset, index) {
-            return '<article class="asset-card"><button class="asset-delete" type="button" data-action="delete-asset" data-asset-kind="' + (isQrTab ? 'qr' : 'images') + '" data-asset-index="' + index + '" aria-label="删除' + escapeHTML(asset.name) + '">删除</button><div class="asset-thumb"><img src="' + asset.url + '" alt=""></div><div class="asset-name">' + escapeHTML(asset.name) + '</div></article>';
+            return '<article class="asset-card"><button class="asset-delete" type="button" data-action="delete-asset" data-asset-index="' + index + '" aria-label="删除' + escapeHTML(asset.name) + '">删除</button><div class="asset-thumb"><img src="' + asset.url + '" alt=""></div><div class="asset-name">' + escapeHTML(asset.name) + '</div></article>';
           }).join('') + '</div>' :
-            '<div class="panel empty"><span class="empty-mark">材</span><strong>' + emptyTitle + '</strong><p>上传后会保存在当前酒店，供应用按需使用。</p></div>',
+            '<div class="panel empty"><span class="empty-mark">图</span><strong>还没有图片素材</strong><p>上传后会保存在当前酒店，供应用按需使用。</p></div>',
           '</div></div>',
           '</main>'
         ].join('');
@@ -2925,8 +2879,7 @@
       function uploadAssets(event) {
         var files = Array.prototype.slice.call(event.target.files || []);
         if (!files.length) return;
-        var isQrUpload = event.currentTarget.dataset.assetKind === 'qr';
-        var assetStore = isQrUpload ? transientQrAssets : transientAssets;
+        var assetStore = transientAssets;
         if (!assetStore[state.currentHotelId]) assetStore[state.currentHotelId] = [];
         var remaining = files.length;
         files.forEach(function (file) {
@@ -2936,7 +2889,7 @@
             remaining -= 1;
             if (remaining === 0) {
               render();
-              showToast((isQrUpload ? '二维码' : '图片') + '已加入当前酒店');
+              showToast('图片已加入当前酒店');
             }
           };
           reader.readAsDataURL(file);
@@ -3013,14 +2966,8 @@
           selectedAppId = target.dataset.appId;
           return navigate('app-detail');
         }
-        if (action === 'assets-tab') {
-          assetTab = target.dataset.tab === 'qr' ? 'qr' : 'images';
-          return render();
-        }
         if (action === 'delete-asset') {
-          var deleteKind = target.dataset.assetKind === 'qr' ? 'qr' : 'images';
-          var deleteStore = deleteKind === 'qr' ? transientQrAssets : transientAssets;
-          var deleteList = deleteStore[state.currentHotelId] || [];
+          var deleteList = transientAssets[state.currentHotelId] || [];
           var deleteIndex = Number(target.dataset.assetIndex);
           if (deleteIndex >= 0 && deleteIndex < deleteList.length) {
             deleteList.splice(deleteIndex, 1);
