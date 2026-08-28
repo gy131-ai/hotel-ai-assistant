@@ -790,6 +790,7 @@ a {
   line-height: 1.6;
 }
 
+.upload-ratio-field,
 .upload-usage-field {
   margin-top: 20px;
 }
@@ -1240,7 +1241,7 @@ a {
 
 .metadata-strip {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   margin-bottom: 18px;
   overflow: hidden;
   border: 1px solid var(--line);
@@ -1378,6 +1379,7 @@ a {
 }
 
 .detail-basic-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 14px;
 }
 

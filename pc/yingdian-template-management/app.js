@@ -13,6 +13,7 @@
   let detailTemplateId = "";
   let initialName = "";
   let initialMaterial = "";
+  let initialRatio = "";
   let initialUsage = "";
   let initialMarkdown = "";
   let allowNavigation = false;
@@ -22,6 +23,7 @@
       id: "YD-TPL-001",
       name: "住进风景里",
       material: "朋友圈海报",
+      ratio: "3:4",
       image: "assets/hotel-room.jpg",
       publishStatus: "published",
       inferenceStatus: "success",
@@ -38,6 +40,7 @@
       id: "YD-TPL-002",
       name: "早餐慢时光",
       material: "电子活动海报",
+      ratio: "3:4",
       image: "assets/hotel-dining.jpg",
       publishStatus: "unpublished",
       inferenceStatus: "success",
@@ -56,6 +59,7 @@
       id: "YD-TPL-003",
       name: "星光晚宴邀请函",
       material: "邀请函",
+      ratio: "3:4",
       image: "assets/hotel-night.jpg",
       publishStatus: "disabled",
       inferenceStatus: "failed",
@@ -90,6 +94,10 @@
             if (typeof normalized.revisionUpdatedAt !== "string") {
               needsMigration = true;
               normalized.revisionUpdatedAt = Number(normalized.revision || 0) > 0 ? normalized.updatedAt || normalized.createdAt || "" : "";
+            }
+            if (typeof normalized.ratio !== "string" || !normalized.ratio.trim()) {
+              normalized.ratio = "3:4";
+              needsMigration = true;
             }
             if (normalized.pendingResult && typeof normalized.pendingResult === "object" && Object.prototype.hasOwnProperty.call(normalized.pendingResult, "usage")) {
               normalized.pendingResult = Object.assign({}, normalized.pendingResult);
@@ -312,6 +320,7 @@
     setText("detail-name", template.name);
     setText("detail-id", template.id);
     setText("detail-material", template.material);
+    setText("detail-ratio", template.ratio || "未设置");
     setText("detail-created", template.createdAt);
     setText("detail-updated", template.updatedAt);
     setText("detail-inference-status", inference.label);
@@ -345,6 +354,7 @@
     const usageEditor = document.getElementById("usage-editor");
     const nameInput = document.getElementById("detail-name-input");
     const materialInput = document.getElementById("detail-material-input");
+    const ratioInput = document.getElementById("detail-ratio-input");
     const markdownEditor = document.getElementById("markdown-editor");
     const shouldRefreshBasic = forceEditors || !isBasicDirty();
     const shouldRefreshMarkdown = forceEditors || document.activeElement !== markdownEditor && !isMarkdownDirty();
@@ -352,9 +362,11 @@
     if (shouldRefreshBasic) {
       nameInput.value = template.name || "";
       materialInput.value = template.material || "";
+      ratioInput.value = template.ratio || "";
       usageEditor.value = template.usage || "";
       initialName = nameInput.value;
       initialMaterial = materialInput.value;
+      initialRatio = ratioInput.value;
       initialUsage = usageEditor.value;
     }
     if (shouldRefreshMarkdown) {
@@ -630,6 +642,9 @@
     if (!String(template.material || "").trim()) {
       missing.push("物料类型");
     }
+    if (!String(template.ratio || "").trim()) {
+      missing.push("画幅比例");
+    }
     if (!String(template.image || "").trim()) {
       missing.push("模板原始参考图");
     }
@@ -780,6 +795,7 @@
   function submitUploadForm() {
     const nameInput = document.getElementById("template-name-input");
     const materialInput = document.getElementById("material-type-input");
+    const ratioInput = document.getElementById("template-ratio-input");
     const usageInput = document.getElementById("template-usage-input");
     const submitButton = document.getElementById("upload-submit");
     const name = nameInput.value.trim();
@@ -788,6 +804,7 @@
 
     setFieldError("templateName", "");
     setFieldError("materialType", "");
+    setFieldError("templateRatio", "");
     setFieldError("templateImage", "");
 
     if (!name) {
@@ -796,6 +813,10 @@
     }
     if (!material) {
       setFieldError("materialType", "请选择物料类型");
+      valid = false;
+    }
+    if (!ratioInput || !ratioInput.value.trim()) {
+      setFieldError("templateRatio", "请输入画幅比例");
       valid = false;
     }
     if (!selectedUploadImage) {
@@ -815,6 +836,7 @@
         id: "YD-TPL-" + String(timestamp).slice(-6),
         name: name,
         material: material,
+        ratio: ratioInput.value.trim(),
         image: selectedUploadImage,
         imageName: selectedUploadFileName,
         publishStatus: "unpublished",
@@ -876,7 +898,7 @@
     if (replace) {
       replace.hidden = true;
     }
-    ["templateName", "materialType", "templateImage"].forEach(function (fieldName) {
+    ["templateName", "materialType", "templateRatio", "templateImage"].forEach(function (fieldName) {
       setFieldError(fieldName, "");
     });
   }
@@ -893,10 +915,12 @@
 
     const nameInput = document.getElementById("detail-name-input");
     const materialInput = document.getElementById("detail-material-input");
+    const ratioInput = document.getElementById("detail-ratio-input");
     const usageEditor = document.getElementById("usage-editor");
     const markdownEditor = document.getElementById("markdown-editor");
     nameInput.addEventListener("input", updateDirtyIndicators);
     materialInput.addEventListener("input", updateDirtyIndicators);
+    ratioInput.addEventListener("input", updateDirtyIndicators);
     usageEditor.addEventListener("input", updateDirtyIndicators);
     markdownEditor.addEventListener("input", updateDirtyIndicators);
 
@@ -940,10 +964,11 @@
   function isBasicDirty() {
     const nameInput = document.getElementById("detail-name-input");
     const materialInput = document.getElementById("detail-material-input");
+    const ratioInput = document.getElementById("detail-ratio-input");
     const usageEditor = document.getElementById("usage-editor");
     return Boolean(
-      nameInput && materialInput && usageEditor &&
-      (nameInput.value !== initialName || materialInput.value !== initialMaterial || usageEditor.value !== initialUsage)
+      nameInput && materialInput && ratioInput && usageEditor &&
+      (nameInput.value !== initialName || materialInput.value !== initialMaterial || ratioInput.value !== initialRatio || usageEditor.value !== initialUsage)
     );
   }
 
@@ -969,27 +994,34 @@
     const template = findTemplate(detailTemplateId);
     const nameInput = document.getElementById("detail-name-input");
     const materialInput = document.getElementById("detail-material-input");
+    const ratioInput = document.getElementById("detail-ratio-input");
     const editor = document.getElementById("usage-editor");
-    if (!template || !nameInput || !materialInput || !editor) {
+    if (!template || !nameInput || !materialInput || !ratioInput || !editor) {
       return;
     }
     setFieldError("detailName", "");
     setFieldError("detailMaterial", "");
+    setFieldError("detailRatio", "");
     const name = nameInput.value.trim();
     const material = materialInput.value;
+    const ratio = ratioInput.value.trim();
     if (!name) {
       setFieldError("detailName", "请输入模板名称");
     }
     if (!material) {
       setFieldError("detailMaterial", "请选择物料类型");
     }
-    if (!name || !material) {
+    if (!ratio) {
+      setFieldError("detailRatio", "请输入画幅比例");
+    }
+    if (!name || !material || !ratio) {
       showToast("请补充模板基础内容");
       return;
     }
     const materialChanged = material !== template.material;
     template.name = name;
     template.material = material;
+    template.ratio = ratio;
     template.usage = editor.value.trim();
     if (materialChanged) {
       template.pendingResult = null;
@@ -999,8 +1031,10 @@
     template.updatedAt = formatNow();
     initialName = name;
     initialMaterial = material;
+    initialRatio = ratio;
     nameInput.value = name;
     materialInput.value = material;
+    ratioInput.value = ratio;
     editor.value = template.usage;
     initialUsage = editor.value;
     persistTemplates();
