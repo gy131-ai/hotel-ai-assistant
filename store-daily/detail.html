@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="店长日报事项详情原型">
+  <title>店长日报｜事项详情</title>
+  <link rel="stylesheet" href="prototype.css">
+</head>
+<body>
+  <div class="phone" data-screen-label="事项详情页">
+    <header class="topbar">
+      <a class="back" id="backLink" href="index.html" aria-label="返回来源页面">‹</a>
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true"><span class="brand-glyph"></span></div>
+        <div class="brand-copy"><strong>店长日报</strong></div>
+      </div>
+      <div class="hotel-name" aria-label="当前酒店"><span class="hotel-dot" aria-hidden="true"></span><span>云栖花园酒店</span></div>
+    </header>
+
+    <main class="detail-main">
+      <section class="detail-heading" aria-labelledby="detailTitle">
+        <div class="tag-row" id="detailTags"></div>
+        <h1 id="detailTitle">大型公共活动将在附近场馆举行</h1>
+        <p id="detailSummary">活动时段可能影响周边住宿需求与住客到店交通。</p>
+      </section>
+
+      <section class="detail-hero" aria-labelledby="factTitle">
+        <div class="section-label" id="factTitle">事项事实</div>
+        <p id="factText">附近场馆将举行大型公共活动，当前事项已确认。</p>
+      </section>
+
+      <section class="detail-block" aria-labelledby="impactTitle">
+        <div class="section-label">影响范围</div>
+        <h2 id="impactTitle">时间、地点与本店关系</h2>
+        <dl class="detail-grid">
+          <div class="detail-row"><dt>影响日期</dt><dd id="impactDate">9月2日</dd></div>
+          <div class="detail-row"><dt>影响时段</dt><dd id="impactTime" class="muted">待事项来源进一步确认</dd></div>
+          <div class="detail-row"><dt>事项地点</dt><dd id="impactPlace">附近场馆</dd></div>
+          <div class="detail-row"><dt>本店关系</dt><dd id="impactRelation">可能影响周边住宿需求与住客到店交通。</dd></div>
+        </dl>
+      </section>
+
+      <section class="detail-block" aria-labelledby="checkTitle">
+        <div class="section-label">线下判断</div>
+        <h2 id="checkTitle">建议检查</h2>
+        <ul class="check-list" id="checkList"></ul>
+        <p class="note">仅供店长线下判断和操作，不记录执行结果，不创建平台任务。</p>
+      </section>
+
+      <section class="detail-block" aria-labelledby="sourceTitle">
+        <div class="section-label">信息依据</div>
+        <h2 id="sourceTitle">信息来源</h2>
+        <dl class="detail-grid">
+          <div class="detail-row"><dt>来源机构</dt><dd id="sourceOrg">官方场馆</dd></div>
+          <div class="detail-row"><dt>发布时间</dt><dd id="sourcePublished" class="muted">今天 09:40</dd></div>
+          <div class="detail-row"><dt>最近核验</dt><dd id="sourceChecked">今天 10:20</dd></div>
+          <div class="detail-row"><dt>核验状态</dt><dd>已核验，用户端不展示来源原文</dd></div>
+        </dl>
+      </section>
+
+      <section class="detail-block" aria-labelledby="timelineTitle">
+        <div class="section-label">持续更新</div>
+        <h2 id="timelineTitle">后续变化</h2>
+        <ol class="timeline" id="timelineList"></ol>
+      </section>
+
+      <div class="feedback" aria-label="事项反馈">
+        <button type="button" data-feedback="useful">有用</button>
+        <button type="button" data-feedback="irrelevant">不相关</button>
+        <button type="button" data-feedback="problem">信息问题</button>
+      </div>
+    </main>
+
+    <div class="detail-actions" aria-label="事项主要操作">
+      <div class="action-row">
+        <button class="action primary" type="button" id="readButton">知道了</button>
+        <button class="action accent" type="button" id="followButton">关注这件事</button>
+        <button class="action" type="button" id="remindButton">稍后提醒</button>
+        <button class="action" type="button" id="copyButton">复制文案</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="sheet-backdrop" id="sheetBackdrop" aria-hidden="true">
+    <section class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+      <div class="sheet-handle" aria-hidden="true"></div>
+      <h2 id="sheetTitle">操作</h2>
+      <p id="sheetDescription">原型演示</p>
+      <div class="sheet-options" id="sheetOptions"></div>
+      <button class="sheet-close" id="sheetClose" type="button">关闭</button>
+    </section>
+  </div>
+
+  <script>
+    const detailData = {
+      activity: {
+        type: '活动', typeClass: '', status: '已确认', statusClass: 'status', impact: '影响 9月2日', title: '大型公共活动将在附近场馆举行', summary: '活动时段可能影响周边住宿需求与住客到店交通。', fact: '附近场馆将举行大型公共活动，当前事项已确认。', date: '9月2日', time: '待事项来源进一步确认', place: '附近场馆', relation: '可能影响周边住宿需求与住客到店交通。', source: '官方场馆', published: '今天 09:40', checked: '今天 10:20', checks: ['检查9月2日相关订单与到店安排', '准备住客到店路线提示'], timeline: ['今天 10:20｜系统完成最近一次核验，事项状态为已确认。']
+      },
+      weather: {
+        type: '天气', typeClass: 'warning', status: '预警升级', statusClass: 'changed', impact: '影响 72 小时', title: '当前区域发布强影响天气预警', summary: '预警有效期内可能影响住客到店、现场服务与安全准备。', fact: '当前区域发布强影响天气预警，预警状态已升级。', date: '未来 72 小时', time: '有效时间以来源更新为准', place: '当前区域', relation: '可能影响住客到店、现场服务与安全准备。', source: '官方气象接口', published: '今天 09:30', checked: '今天 09:50', checks: ['关注预警有效期内的住客到店提示', '检查现场服务与安全准备'], timeline: ['今天 09:50｜系统完成最近一次核验，预警状态升级。']
+      },
+      traffic: {
+        type: '交通', typeClass: 'info', status: '已确认', statusClass: 'status', impact: '影响 9月3日', title: '主要到店路线将出现运行变化', summary: '受影响路段可能改变住客到店路线。', fact: '主要到店路线将出现运行变化，当前事项已确认。', date: '9月3日', time: '影响时段待确认', place: '主要到店路线', relation: '受影响路段可能改变住客到店路线。', source: '交通运营方', published: '昨天 15:50', checked: '昨天 16:40', checks: ['查看9月3日住客到店路线提示', '关注受影响路段的恢复信息'], timeline: ['昨天 16:40｜系统完成最近一次核验，事项状态为已确认。']
+      },
+      weekend: {
+        type: '活动', typeClass: '', status: '待阅', statusClass: 'info', impact: '影响 9月5日', title: '周末公共活动将在城市会展区域举行', summary: '活动时间、周边交通和住客到店提示需要提前查看。', fact: '周末公共活动将在城市会展区域举行，当前日期已确认。', date: '9月5日', time: '影响时段待确认', place: '城市会展区域', relation: '活动时段可能影响周边交通与住客到店提示。', source: '主办方官方', published: '昨天 13:50', checked: '昨天 14:15', checks: ['查看活动时间与周边交通', '准备住客到店提示'], timeline: ['昨天 14:15｜系统完成最近一次核验，事项状态为已确认。']
+      }
+    };
+    const params = new URLSearchParams(location.search);
+    const detailId = params.get('id') || 'activity';
+    const detail = detailData[detailId] || detailData.activity;
+    const sourcePage = params.get('from') === 'follow' ? 'follow.html' : params.get('from') === 'pending' ? 'pending.html' : 'index.html';
+    const toast = document.querySelector('#toast');
+    const backdrop = document.querySelector('#sheetBackdrop');
+    const sheetTitle = document.querySelector('#sheetTitle');
+    const sheetDescription = document.querySelector('#sheetDescription');
+    const sheetOptions = document.querySelector('#sheetOptions');
+    let toastTimer;
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+    }
+
+    function closeSheet() {
+      backdrop.classList.remove('open');
+      backdrop.setAttribute('aria-hidden', 'true');
+      sheetOptions.innerHTML = '';
+    }
+
+    function openSheet(title, description, options) {
+      sheetTitle.textContent = title;
+      sheetDescription.textContent = description;
+      sheetOptions.innerHTML = '';
+      options.forEach((option) => {
+        const button = document.createElement('button');
+        button.className = 'sheet-option';
+        button.type = 'button';
+        button.innerHTML = `<span>${option.label}</span><small>${option.note || '原型演示'}</small>`;
+        button.addEventListener('click', () => { if (option.action) option.action(); closeSheet(); });
+        sheetOptions.appendChild(button);
+      });
+      backdrop.classList.add('open');
+      backdrop.setAttribute('aria-hidden', 'false');
+    }
+
+    function copyText() {
+      const text = `${detail.title}。${detail.summary}影响日期：${detail.date}。来源机构：${detail.source}。最近核验：${detail.checked}。`;
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).catch(() => {});
+      showToast('已复制事项文案');
+    }
+
+    function renderDetail() {
+      document.querySelector('#detailTags').innerHTML = `<span class="tag ${detail.typeClass}">${detail.type}</span><span class="tag ${detail.statusClass}">${detail.status}</span><span class="tag info">${detail.impact}</span>`;
+      document.querySelector('#detailTitle').textContent = detail.title;
+      document.querySelector('#detailSummary').textContent = detail.summary;
+      document.querySelector('#factText').textContent = detail.fact;
+      document.querySelector('#impactDate').textContent = detail.date;
+      document.querySelector('#impactTime').textContent = detail.time;
+      document.querySelector('#impactPlace').textContent = detail.place;
+      document.querySelector('#impactRelation').textContent = detail.relation;
+      document.querySelector('#sourceOrg').textContent = detail.source;
+      document.querySelector('#sourcePublished').textContent = detail.published;
+      document.querySelector('#sourceChecked').textContent = detail.checked;
+      document.querySelector('#checkList').innerHTML = detail.checks.map((item) => `<li>${item}</li>`).join('');
+      document.querySelector('#timelineList').innerHTML = detail.timeline.map((item) => { const parts = item.split('｜'); return `<li><time>${parts[0]}</time><span>${parts[1]}</span></li>`; }).join('');
+      document.querySelector('#backLink').href = sourcePage;
+      document.title = `店长日报｜${detail.title}`;
+      if (detailId === 'activity' && localStorage.getItem('jr-follow-activity') === '1') {
+        document.querySelector('#followButton').classList.add('active');
+        document.querySelector('#followButton').textContent = '已关注';
+      }
+    }
+
+    document.querySelector('#readButton').addEventListener('click', (event) => {
+      const button = event.currentTarget;
+      button.classList.toggle('active');
+      button.textContent = button.classList.contains('active') ? '已阅' : '知道了';
+      showToast(button.classList.contains('active') ? '已标记为已阅' : '已恢复为未阅演示状态');
+    });
+    document.querySelector('#followButton').addEventListener('click', (event) => {
+      const button = event.currentTarget;
+      const active = button.classList.toggle('active');
+      if (detailId === 'activity') localStorage.setItem('jr-follow-activity', active ? '1' : '0');
+      button.textContent = active ? '已关注' : '关注这件事';
+      showToast(active ? '已加入关注' : '已取消关注');
+    });
+    document.querySelector('#remindButton').addEventListener('click', () => openSheet('稍后提醒', '只展示仍然有效的提醒选项。', [
+      { label: '事项发生前 1 天', action: () => showToast('已选择：事项发生前 1 天') },
+      { label: '事项发生前 3 天', action: () => showToast('已选择：事项发生前 3 天') },
+      { label: '自定义日期和时间', action: () => showToast('已选择自定义提醒') }
+    ]));
+    document.querySelector('#copyButton').addEventListener('click', copyText);
+    document.querySelectorAll('[data-feedback]').forEach((button) => button.addEventListener('click', () => {
+      const type = button.dataset.feedback;
+      if (type === 'useful') showToast('感谢反馈');
+      if (type === 'irrelevant') openSheet('为什么不相关', '选择一个原因，帮助调整后续推荐。', [
+        { label: '距离或影响范围不相关', action: () => showToast('已提交不相关反馈') },
+        { label: '活动规模太小', action: () => showToast('已提交不相关反馈') },
+        { label: '与本店客群不匹配', action: () => showToast('已提交不相关反馈') },
+        { label: '其他原因', action: () => showToast('已提交不相关反馈') }
+      ]);
+      if (type === 'problem') openSheet('反馈信息问题', '选择需要核查的事实问题。', [
+        { label: '时间或地点错误', action: () => showToast('已提交信息问题') },
+        { label: '信息已过期', action: () => showToast('已提交信息问题') },
+        { label: '活动已经取消', action: () => showToast('已提交信息问题') },
+        { label: '其他事实问题', action: () => showToast('已提交信息问题') }
+      ]);
+    }));
+    document.querySelector('#sheetClose').addEventListener('click', closeSheet);
+    backdrop.addEventListener('click', (event) => { if (event.target === backdrop) closeSheet(); });
+    renderDetail();
+  </script>
+</body>
+</html>

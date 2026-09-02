@@ -1,0 +1,54 @@
+{
+  "type": "design",
+  "designSystems": [],
+  "primaryDesignSystem": null,
+  "assets": {
+    "店长日报完整原型首页": {
+      "versions": [
+        {
+          "path": "index.html",
+          "createdAt": "2026-09-02T04:21:28.290Z",
+          "status": "needs-review"
+        }
+      ]
+    },
+    "店长日报完整原型待阅事项": {
+      "versions": [
+        {
+          "path": "pending.html",
+          "createdAt": "2026-09-02T04:21:28.371Z",
+          "status": "needs-review"
+        }
+      ]
+    },
+    "店长日报完整原型关注页": {
+      "versions": [
+        {
+          "path": "follow.html",
+          "createdAt": "2026-09-02T04:21:28.444Z",
+          "status": "needs-review"
+        }
+      ]
+    },
+    "店长日报完整原型事项详情": {
+      "versions": [
+        {
+          "path": "detail.html",
+          "createdAt": "2026-09-02T04:21:28.520Z",
+          "status": "needs-review"
+        }
+      ]
+    },
+    "店长日报完整原型共享样式": {
+      "versions": [
+        {
+          "path": "prototype.css",
+          "createdAt": "2026-09-02T04:21:28.599Z",
+          "status": "needs-review"
+        }
+      ]
+    }
+  },
+  "createdAt": "2026-09-02T04:21:28.291Z",
+  "updatedAt": "2026-09-02T04:21:28.600Z"
+}

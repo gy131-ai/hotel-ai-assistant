@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>店长日报｜待阅事项</title>
+  <style>
+    :root { --bg:#F6F5F2; --surface:#FFF; --text:#252A30; --secondary:#687078; --muted:#92989B; --border:#DFDED9; --action:#30353A; --accent:#A85B2A; --accent-dark:#84451F; --accent-soft:#F3E3D4; --warning:#B97824; --warning-soft:#F8EEDC; --success:#5F7A61; --success-soft:#EAF0EA; --info:#667085; --info-soft:#EEF0F2; --shadow:0 18px 60px rgba(37,42,48,.12); }
+    * { box-sizing:border-box; } html { background:#D8D5CF; } body { margin:0; background:#D8D5CF; color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Noto Sans SC",sans-serif; line-height:1.6; }
+    button { font:inherit; } .phone { width:min(100%,430px); min-height:100vh; margin:0 auto; background:var(--bg); box-shadow:var(--shadow); position:relative; overflow:hidden; }
+    .topbar { position:sticky; top:0; z-index:4; display:flex; align-items:center; gap:13px; padding:calc(14px + env(safe-area-inset-top)) 20px 13px; background:rgba(246,245,242,.94); backdrop-filter:blur(16px); border-bottom:1px solid rgba(223,222,217,.72); }
+    .back { width:32px; height:32px; border:0; border-radius:9px; background:transparent; color:var(--text); font-size:24px; line-height:1; cursor:pointer; } .back:hover { background:var(--surface); }
+    .brand { display:flex; align-items:center; gap:9px; } .brand-mark { width:30px; height:30px; border-radius:9px; display:grid; place-items:center; background:var(--action); color:#fff; } .brand-glyph { position:relative; width:15px; height:17px; border:1.6px solid #fff; border-radius:3px; background:linear-gradient(#fff,#fff) 3px 8px / 8px 1px no-repeat, linear-gradient(#fff,#fff) 3px 11px / 6px 1px no-repeat; } .brand-glyph::before { content:""; position:absolute; top:4px; right:2px; left:2px; border-top:1.6px solid #fff; } .brand-glyph::after { content:""; position:absolute; top:-4px; left:3px; width:7px; height:5px; border:1.6px solid #fff; border-bottom:0; border-radius:3px 3px 0 0; } .brand-copy strong { font-size:14px; }
+    main { padding:24px 16px 40px; } .heading { margin:0 2px 18px; } .eyebrow { color:var(--accent-dark); font-size:11px; font-weight:800; letter-spacing:.12em; } h1 { margin:6px 0 3px; font-size:28px; line-height:1.18; letter-spacing:-.045em; } .heading p { margin:0; color:var(--secondary); font-size:12px; }
+    .list { display:grid; gap:12px; } .card { padding:16px; border:1px solid var(--border); border-radius:16px; background:var(--surface); box-shadow:0 6px 18px rgba(37,42,48,.035); } .card-top { display:flex; align-items:center; justify-content:space-between; gap:10px; } .tags { display:flex; flex-wrap:wrap; gap:6px; } .tag { display:inline-flex; align-items:center; min-height:24px; padding:0 8px; border-radius:999px; background:var(--accent-soft); color:var(--accent-dark); font-size:11px; font-weight:750; } .tag.warning { background:var(--warning-soft); color:#815216; } .tag.info { background:var(--info-soft); color:var(--info); } .tag.status { background:var(--success-soft); color:var(--success); } .time { color:var(--muted); font-size:11px; white-space:nowrap; } .card h2 { margin:11px 0 7px; font-size:18px; line-height:1.34; letter-spacing:-.025em; } .fact { margin:0; color:var(--secondary); font-size:13px; line-height:1.65; } .fact strong { color:var(--text); } .meta { display:flex; flex-wrap:wrap; gap:6px 12px; margin-top:12px; padding-top:10px; border-top:1px solid var(--border); color:var(--muted); font-size:10px; } .actions { display:flex; flex-wrap:wrap; gap:7px; margin-top:13px; } .action { min-height:34px; padding:0 10px; border:1px solid var(--border); border-radius:8px; background:var(--surface); color:var(--text); font-size:11px; cursor:pointer; } .action.primary { border-color:var(--action); background:var(--action); color:#fff; } .action:hover { background:var(--bg); } .action.primary:hover { background:#1F2428; } .empty { margin-top:14px; padding:17px; border:1px dashed var(--border); border-radius:13px; color:var(--secondary); background:#FAFAF8; font-size:12px; }
+    .toast { position:fixed; z-index:20; left:50%; bottom:28px; transform:translate(-50%,16px); padding:9px 13px; border-radius:10px; background:var(--action); color:#fff; font-size:12px; opacity:0; pointer-events:none; transition:opacity .2s ease,transform .2s ease; } .toast.show { opacity:1; transform:translate(-50%,0); }
+    @media (min-width:700px) { body { padding:24px 0; } .phone { min-height:calc(100vh - 48px); border-radius:26px; } .topbar { border-radius:26px 26px 0 0; } }
+  </style>
+</head>
+<body>
+  <div class="phone" data-screen-label="待阅事项页">
+    <header class="topbar"><button class="back" id="back" type="button" aria-label="返回早报">‹</button><div class="brand"><div class="brand-mark" aria-hidden="true"><span class="brand-glyph"></span></div><div class="brand-copy"><strong>店长日报</strong></div></div></header>
+    <main>
+      <section class="heading"><div class="eyebrow">需要查看</div><h1>待阅事项</h1><p>共 2 件 · 按首次发布时间排序</p></section>
+      <section class="list" aria-label="待阅事项列表">
+        <article class="card"><div class="card-top"><div class="tags"><span class="tag info">交通</span><span class="tag status">已确认</span></div><span class="time">影响 9月3日</span></div><h2>主要到店路线将出现运行变化</h2><p class="fact"><strong>为什么与本店有关：</strong>受影响路段可能改变住客到店路线。</p><div class="meta"><span>来源机构：交通运营方</span><span>最近核验：昨天 16:40</span></div><div class="actions"><button class="action primary" type="button" data-read>知道了</button><button class="action" type="button" data-detail data-detail-id="traffic">查看详情</button></div></article>
+        <article class="card"><div class="card-top"><div class="tags"><span class="tag">活动</span><span class="tag status">已确认</span></div><span class="time">影响 9月5日</span></div><h2>周末公共活动将在城市会展区域举行</h2><p class="fact"><strong>建议先看：</strong>活动时间、周边交通和住客到店提示。</p><div class="meta"><span>来源机构：主办方官方</span><span>最近核验：昨天 14:15</span></div><div class="actions"><button class="action primary" type="button" data-read>知道了</button><button class="action" type="button" data-detail data-detail-id="activity">查看详情</button></div></article>
+      </section>
+      <div class="empty" id="empty" hidden>待阅事项已全部查看。</div>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script>
+    const toast = document.querySelector('#toast');
+    let toastTimer;
+    function showToast(message) { toast.textContent = message; toast.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => toast.classList.remove('show'), 2200); }
+    document.querySelector('#back').addEventListener('click', () => { if (history.length > 1) history.back(); else location.href = 'index.html'; });
+    document.querySelectorAll('[data-read]').forEach((button) => button.addEventListener('click', () => { const card = button.closest('.card'); button.textContent = '已阅'; button.disabled = true; card.style.opacity = '.58'; card.style.order = '2'; showToast('已标记为已阅'); const remaining = document.querySelectorAll('[data-read]:not(:disabled)').length; if (!remaining) document.querySelector('#empty').hidden = false; }));
+    document.querySelectorAll('[data-detail]').forEach((button) => button.addEventListener('click', () => {
+      location.href = `detail.html?id=${button.dataset.detailId || 'activity'}&from=pending`;
+    }));
+  </script>
+</body>
+</html>

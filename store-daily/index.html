@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="店长日报首页设计预览">
+  <title>店长日报｜早报首页设计 V1.0</title>
+  <style>
+    :root {
+      --jr-bg: #F6F5F2;
+      --jr-surface: #FFFFFF;
+      --jr-surface-soft: #FBF8F5;
+      --jr-text: #252A30;
+      --jr-text-secondary: #687078;
+      --jr-text-muted: #92989B;
+      --jr-border: #DFDED9;
+      --jr-border-strong: #C9C8C2;
+      --jr-action: #30353A;
+      --jr-action-hover: #1F2428;
+      --jr-accent: #A85B2A;
+      --jr-accent-dark: #84451F;
+      --jr-accent-soft: #F3E3D4;
+      --jr-accent-pale: #FAF3ED;
+      --jr-warning: #B97824;
+      --jr-warning-soft: #F8EEDC;
+      --jr-success: #5F7A61;
+      --jr-success-soft: #EAF0EA;
+      --jr-danger: #B54747;
+      --jr-danger-soft: #F7E8E8;
+      --jr-info: #667085;
+      --jr-info-soft: #EEF0F2;
+      --shadow: 0 18px 60px rgba(37, 42, 48, .12);
+    }
+    * { box-sizing: border-box; }
+    html { background: #D8D5CF; }
+    body { margin: 0; background: #D8D5CF; color: var(--jr-text); font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Noto Sans SC", sans-serif; line-height: 1.6; }
+    button { font: inherit; }
+    .phone { width: min(100%, 430px); min-height: 100vh; margin: 0 auto; background: var(--jr-bg); box-shadow: var(--shadow); position: relative; overflow: hidden; }
+    .topbar { position: sticky; top: 0; z-index: 4; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: calc(14px + env(safe-area-inset-top)) 20px 13px; background: rgba(246, 245, 242, .92); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(223, 222, 217, .72); }
+    .brand { display: flex; align-items: center; gap: 9px; min-width: 0; }
+    .brand-mark { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; background: var(--jr-action); color: #fff; }
+    .brand-glyph { position: relative; width: 15px; height: 17px; border: 1.6px solid #fff; border-radius: 3px; background: linear-gradient(#fff, #fff) 3px 8px / 8px 1px no-repeat, linear-gradient(#fff, #fff) 3px 11px / 6px 1px no-repeat; }
+    .brand-glyph::before { content: ""; position: absolute; top: 4px; right: 2px; left: 2px; border-top: 1.6px solid #fff; }
+    .brand-glyph::after { content: ""; position: absolute; top: -4px; left: 3px; width: 7px; height: 5px; border: 1.6px solid #fff; border-bottom: 0; border-radius: 3px 3px 0 0; }
+    .brand-copy { display: grid; gap: 0; line-height: 1.15; }
+    .brand-copy strong { font-size: 14px; letter-spacing: .02em; }
+    .brand-copy span { color: var(--jr-text-muted); font-size: 10px; letter-spacing: .08em; }
+    .hotel-name { display: inline-flex; align-items: center; gap: 7px; max-width: 190px; min-height: 32px; padding: 0 2px; color: var(--jr-text-secondary); font-size: 12px; }
+    .hotel-name span:last-child { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+    .hotel-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--jr-accent); flex: 0 0 auto; }
+    main { padding: 22px 16px 96px; }
+    .hero { padding: 18px 18px 15px; border: 1px solid #3B4147; border-radius: 18px; background: var(--jr-action); color: #fff; box-shadow: 0 12px 25px rgba(37, 42, 48, .15); position: relative; overflow: hidden; }
+    .hero::before { content: ""; position: absolute; width: 220px; height: 220px; border: 1px solid rgba(243, 227, 212, .22); border-radius: 50%; right: -120px; top: -112px; }
+    .hero::after { content: ""; position: absolute; width: 110px; height: 110px; border-radius: 50%; right: -35px; top: -25px; background: rgba(168, 91, 42, .25); }
+    .eyebrow { color: #E5B996; font-size: 11px; font-weight: 800; letter-spacing: .14em; }
+    h1 { margin: 5px 0 2px; font-size: 25px; line-height: 1.18; letter-spacing: -.045em; text-wrap: balance; color: #fff; }
+    .hero-date { color: rgba(255, 255, 255, .7); font-size: 13px; }
+    .hero-note { display: none; }
+    .summary-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 13px; }
+    .summary-item { display: flex; align-items: baseline; gap: 6px; min-height: 46px; padding: 8px 10px; border: 1px solid rgba(255, 255, 255, .16); border-radius: 10px; background: rgba(255, 255, 255, .08); }
+    .summary-item b { font-size: 19px; line-height: 1.1; letter-spacing: -.04em; color: #fff; }
+    .summary-item span { color: rgba(255, 255, 255, .62); font-size: 11px; }
+    .summary-item:first-child b { color: #E5B996; }
+    .future-mini { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; min-height: 46px; margin-top: 0; padding: 0 10px; border: 1px solid rgba(229, 185, 150, .52); border-radius: 10px; background: rgba(168, 91, 42, .22); color: rgba(255, 255, 255, .82); font-size: 11px; cursor: pointer; text-align: left; transition: background .18s ease, border-color .18s ease, transform .18s ease; }
+    .future-mini:hover { border-color: rgba(229, 185, 150, .72); background: rgba(168, 91, 42, .28); transform: translateY(-1px); }
+    .future-mini strong { color: #F0C7A5; font-size: 12px; font-weight: 750; }
+    .future-mini span:last-child { color: #F0C7A5; font-size: 15px; line-height: 1; }
+    .week-panel { display: none; margin-top: 14px; padding: 15px; border: 1px solid var(--jr-border); border-radius: 16px; background: var(--jr-surface); box-shadow: 0 6px 18px rgba(37, 42, 48, .035); }
+    .week-panel.open { display: block; }
+    .panel-head { display: flex; align-items: end; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+    .panel-title { margin: 0; font-size: 15px; letter-spacing: -.02em; }
+    .panel-subtitle { color: var(--jr-text-muted); font-size: 11px; }
+    .week-close { min-height: 28px; padding: 0 8px; border: 1px solid var(--jr-border); border-radius: 7px; background: var(--jr-bg); color: var(--jr-text-secondary); font-size: 10px; }
+    .week-row { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; }
+    .day { min-height: 55px; padding: 7px 2px 5px; border: 1px solid transparent; border-radius: 10px; background: var(--jr-bg); color: var(--jr-text-secondary); cursor: pointer; text-align: center; transition: transform .18s ease, border-color .18s ease, background .18s ease; }
+    .day:hover { transform: translateY(-1px); border-color: var(--jr-border-strong); }
+    .day[aria-selected="true"] { background: var(--jr-accent-soft); border-color: #D7B59E; color: var(--jr-accent-dark); }
+    .day-label { display: block; font-size: 10px; }
+    .day-number { display: block; margin-top: 2px; font-size: 17px; font-weight: 750; line-height: 1.2; }
+    .day-dots { display: flex; justify-content: center; gap: 3px; margin-top: 5px; min-height: 5px; }
+    .day-dots i { display: block; width: 4px; height: 4px; border-radius: 50%; background: var(--jr-accent); }
+    .day-dots i.weather { background: var(--jr-warning); }
+    .day-dots i.traffic { background: var(--jr-info); }
+    .week-items { display: grid; gap: 7px; margin-top: 10px; }
+    .week-item { display: grid; grid-template-columns: 42px 1fr auto; align-items: center; gap: 9px; min-height: 52px; padding: 9px 10px; border: 1px solid var(--jr-border); border-radius: 11px; background: var(--jr-surface-soft); color: var(--jr-text); text-align: left; text-decoration: none; }
+    .week-item:hover { border-color: var(--jr-border-strong); background: var(--jr-bg); }
+    .week-item[hidden] { display: none; }
+    .week-item-date { color: var(--jr-accent-dark); font-size: 11px; font-weight: 750; }
+    .week-item-copy { display: grid; gap: 1px; min-width: 0; }
+    .week-item-copy strong { overflow: hidden; font-size: 12px; white-space: nowrap; text-overflow: ellipsis; }
+    .week-item-copy span { color: var(--jr-text-muted); font-size: 10px; }
+    .week-item-arrow { color: var(--jr-accent-dark); font-size: 17px; }
+    .week-empty { margin-top: 10px; padding: 12px; border: 1px dashed var(--jr-border-strong); border-radius: 10px; color: var(--jr-text-muted); font-size: 11px; text-align: center; }
+    .section { margin-top: 21px; }
+    .section-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 3px 10px; }
+    .section-head h2 { margin: 0; font-size: 17px; letter-spacing: -.025em; }
+    .section-count { color: var(--jr-text-muted); font-size: 12px; }
+    .section-kicker { margin-bottom: 2px; color: var(--jr-text-muted); font-size: 9px; font-weight: 800; letter-spacing: .12em; }
+    .card-stack { display: grid; gap: 10px; }
+    .event-card { padding: 15px 16px; border: 1px solid var(--jr-border); border-radius: 16px; background: var(--jr-surface); box-shadow: 0 6px 18px rgba(37, 42, 48, .035); }
+    .event-card.compact { padding: 13px 14px; background: var(--jr-surface-soft); border-color: #E7DDD3; box-shadow: none; }
+    .card-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .tag-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+    .tag { display: inline-flex; align-items: center; min-height: 24px; padding: 0 8px; border-radius: 999px; background: var(--jr-accent-soft); color: var(--jr-accent-dark); font-size: 11px; font-weight: 750; }
+    .tag.warning { background: var(--jr-warning-soft); color: #815216; }
+    .tag.info { background: var(--jr-info-soft); color: var(--jr-info); }
+    .tag.status { background: var(--jr-success-soft); color: var(--jr-success); }
+    .tag.changed { background: var(--jr-warning-soft); color: #815216; }
+    .tag.cancelled { background: var(--jr-danger-soft); color: var(--jr-danger); }
+    .card-time { color: var(--jr-text-muted); font-size: 11px; white-space: nowrap; }
+    .event-card h3 { margin: 10px 0 6px; font-size: 17px; line-height: 1.34; letter-spacing: -.025em; text-wrap: pretty; }
+    .event-card.compact h3 { margin-top: 8px; font-size: 15px; }
+    .fact-line { margin: 0; color: var(--jr-text-secondary); font-size: 12px; line-height: 1.58; }
+    .fact-line strong { color: var(--jr-text); font-weight: 700; }
+    .card-meta { display: flex; flex-wrap: wrap; gap: 6px 12px; margin-top: 10px; padding-top: 9px; border-top: 1px solid var(--jr-border); color: var(--jr-text-muted); font-size: 10px; }
+    .event-card.compact .card-meta { border-top-color: #E7DDD3; }
+    .meta-item { display: inline-flex; align-items: center; gap: 5px; }
+    .meta-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--jr-accent); }
+    .meta-dot.warning { background: var(--jr-warning); }
+    .meta-dot.info { background: var(--jr-info); }
+    .check-list { display: none; }
+    .check-list li { display: flex; gap: 7px; color: var(--jr-text-secondary); font-size: 12px; }
+    .check-list li::before { content: ""; width: 6px; height: 6px; margin-top: 7px; border-radius: 50%; background: var(--jr-accent); flex: 0 0 auto; }
+    .card-actions { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
+    .action { min-height: 33px; padding: 0 10px; border: 1px solid var(--jr-border); border-radius: 8px; background: var(--jr-surface); color: var(--jr-text); font-size: 11px; cursor: pointer; transition: background .18s ease, border-color .18s ease, color .18s ease; }
+    .action:hover { border-color: var(--jr-border-strong); background: var(--jr-bg); }
+    .action.primary { border-color: var(--jr-action); background: var(--jr-action); color: #fff; }
+    .action.primary:hover { background: var(--jr-action-hover); }
+    .action.accent { border-color: #D7B59E; background: var(--jr-accent-pale); color: var(--jr-accent-dark); }
+    .action.accent.active { background: var(--jr-accent-soft); }
+    .action.read.active { color: var(--jr-info); background: var(--jr-info-soft); }
+    .dynamic-note { display: flex; gap: 8px; align-items: flex-start; margin: 0 2px 10px; color: var(--jr-text-secondary); font-size: 12px; }
+    .dynamic-note::before { content: "↻"; display: grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: var(--jr-accent-soft); color: var(--jr-accent-dark); font-size: 12px; flex: 0 0 auto; }
+    .pending-date { margin-top: 11px; padding: 12px 13px; border: 1px dashed var(--jr-border-strong); border-radius: 12px; color: var(--jr-text-secondary); background: #FAFAF8; font-size: 12px; }
+    .pending-date strong { color: var(--jr-text); }
+    .future-entry { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 58px; padding: 12px 13px; border: 1px solid var(--jr-border); border-radius: 13px; background: var(--jr-bg); color: var(--jr-text); cursor: pointer; text-align: left; }
+    .future-entry:hover { border-color: var(--jr-border-strong); background: var(--jr-surface-soft); }
+    .future-entry-copy { display: grid; gap: 1px; }
+    .future-entry-copy strong { font-size: 14px; }
+    .future-entry-copy span { color: var(--jr-text-secondary); font-size: 11px; }
+    .future-entry-arrow { color: var(--jr-accent-dark); font-size: 22px; line-height: 1; }
+    .unread-entry { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; min-height: 52px; padding: 0 15px; border: 1px solid var(--jr-border); border-radius: 13px; background: var(--jr-surface); color: var(--jr-text); cursor: pointer; text-align: left; box-shadow: 0 4px 12px rgba(37, 42, 48, .025); transition: border-color .18s ease, background .18s ease, transform .18s ease; }
+    .unread-entry:hover { border-color: var(--jr-border-strong); background: var(--jr-surface-soft); transform: translateY(-1px); }
+    .unread-entry-copy { display: flex; align-items: baseline; gap: 8px; }
+    .unread-entry-copy strong { font-size: 14px; }
+    .unread-entry-copy span { color: var(--jr-text-muted); font-size: 12px; }
+    .unread-entry-arrow { color: var(--jr-accent-dark); font-size: 21px; line-height: 1; }
+    .bottom-nav { position: absolute; z-index: 5; right: 0; bottom: 0; left: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 10px 18px calc(10px + env(safe-area-inset-bottom)); background: rgba(255, 255, 255, .94); border-top: 1px solid var(--jr-border); backdrop-filter: blur(16px); }
+    .nav-button { display: grid; justify-items: center; gap: 3px; min-height: 44px; border: 0; background: transparent; color: var(--jr-text-muted); cursor: pointer; font-size: 11px; }
+    .nav-button[aria-current="page"] { color: var(--jr-accent-dark); font-weight: 750; }
+    .nav-icon { display: grid; place-items: center; width: 25px; height: 25px; border-radius: 9px; font-size: 16px; line-height: 1; }
+    .nav-button[aria-current="page"] .nav-icon { background: var(--jr-accent-soft); }
+    .toast { position: fixed; z-index: 20; left: 50%; bottom: 92px; transform: translate(-50%, 16px); padding: 9px 13px; border-radius: 10px; background: var(--jr-action); color: #fff; font-size: 12px; opacity: 0; pointer-events: none; transition: opacity .2s ease, transform .2s ease; }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+    .sheet-backdrop { position: fixed; z-index: 10; inset: 0; display: grid; align-items: end; background: rgba(37, 42, 48, .24); opacity: 0; pointer-events: none; transition: opacity .2s ease; }
+    .sheet-backdrop.open { opacity: 1; pointer-events: auto; }
+    .sheet { width: min(100%, 430px); padding: 16px 18px calc(18px + env(safe-area-inset-bottom)); border-radius: 22px 22px 0 0; background: var(--jr-surface); transform: translateY(20px); transition: transform .25s ease; }
+    .sheet-backdrop.open .sheet { transform: translateY(0); }
+    .sheet-handle { width: 34px; height: 4px; margin: 0 auto 15px; border-radius: 99px; background: var(--jr-border-strong); }
+    .sheet h2 { margin: 0 0 5px; font-size: 18px; letter-spacing: -.025em; }
+    .sheet p { margin: 0; color: var(--jr-text-secondary); font-size: 13px; }
+    .sheet-options { display: grid; gap: 8px; margin-top: 15px; }
+    .sheet-option { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 46px; padding: 0 13px; border: 1px solid var(--jr-border); border-radius: 11px; background: var(--jr-surface); color: var(--jr-text); text-align: left; cursor: pointer; }
+    .sheet-option small { color: var(--jr-text-muted); }
+    .sheet-close { width: 100%; min-height: 42px; margin-top: 12px; border: 0; border-radius: 10px; background: var(--jr-bg); color: var(--jr-text-secondary); cursor: pointer; }
+    @media (min-width: 700px) { body { padding: 24px 0; } .phone { min-height: calc(100vh - 48px); border-radius: 26px; } .topbar { border-radius: 26px 26px 0 0; } }
+  </style>
+</head>
+<body>
+  <div class="phone" data-screen-label="早报首页">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true"><span class="brand-glyph"></span></div>
+        <div class="brand-copy"><strong>店长日报</strong></div>
+      </div>
+      <div class="hotel-name" aria-label="当前酒店"><span class="hotel-dot" aria-hidden="true"></span><span>云栖花园酒店</span></div>
+    </header>
+
+    <main>
+      <section class="hero" aria-labelledby="pageTitle">
+        <div class="eyebrow">今日简报 · 9月1日</div>
+        <h1 id="pageTitle">今天的店长简报</h1>
+        <div class="hero-date">2026年9月1日 · 星期二</div>
+        <p class="hero-note">先看今天新增，其他事项按需展开查看。</p>
+        <div class="summary-grid" aria-label="今日摘要（原型演示）">
+          <div class="summary-item"><b>2</b><span>今日新增</span></div>
+          <button class="future-mini" id="futureEntry" type="button" aria-label="查看未来 7 天事项" aria-expanded="false" aria-controls="weekPanel"><span><strong>未来 7 天</strong></span><span aria-hidden="true">查看&nbsp;→</span></button>
+        </div>
+      </section>
+
+      <section class="week-panel" id="weekPanel" aria-labelledby="weekTitle" hidden>
+        <div class="panel-head"><div><h2 class="panel-title" id="weekTitle">未来 7 天</h2><div class="panel-subtitle">按日期查看已确认事项</div></div><button class="week-close" id="weekClose" type="button">收起</button></div>
+        <div class="week-row" role="tablist" aria-label="未来 7 天日期">
+          <button class="day" type="button" role="tab" aria-selected="true" data-week-day="1"><span class="day-label">今天</span><span class="day-number">1</span><span class="day-dots"></span></button>
+          <button class="day" type="button" role="tab" aria-selected="false" data-week-day="2"><span class="day-label">周三</span><span class="day-number">2</span><span class="day-dots"><i></i></span></button>
+          <button class="day" type="button" role="tab" aria-selected="false" data-week-day="3"><span class="day-label">周四</span><span class="day-number">3</span><span class="day-dots"><i class="weather"></i><i class="traffic"></i></span></button>
+          <button class="day" type="button" role="tab" aria-selected="false" data-week-day="4"><span class="day-label">周五</span><span class="day-number">4</span><span class="day-dots"></span></button>
+          <button class="day" type="button" role="tab" aria-selected="false" data-week-day="5"><span class="day-label">周六</span><span class="day-number">5</span><span class="day-dots"><i></i></span></button>
+          <button class="day" type="button" role="tab" aria-selected="false" data-week-day="6"><span class="day-label">周日</span><span class="day-number">6</span><span class="day-dots"></span></button>
+          <button class="day" type="button" role="tab" aria-selected="false" data-week-day="7"><span class="day-label">周一</span><span class="day-number">7</span><span class="day-dots"></span></button>
+        </div>
+        <div class="week-items" id="weekItems" aria-live="polite">
+          <a class="week-item" data-week-item="1" href="detail.html?id=weather&from=home"><span class="week-item-date">9月1日</span><span class="week-item-copy"><strong>当前区域发布强影响天气预警</strong><span>天气 · 预警升级</span></span><span class="week-item-arrow" aria-hidden="true">→</span></a>
+          <a class="week-item" data-week-item="2" href="detail.html?id=activity&from=home"><span class="week-item-date">9月2日</span><span class="week-item-copy"><strong>大型公共活动将在附近场馆举行</strong><span>活动 · 已确认</span></span><span class="week-item-arrow" aria-hidden="true">→</span></a>
+          <a class="week-item" data-week-item="3" href="detail.html?id=weather&from=home"><span class="week-item-date">9月3日</span><span class="week-item-copy"><strong>当前区域发布强影响天气预警</strong><span>天气 · 影响持续</span></span><span class="week-item-arrow" aria-hidden="true">→</span></a>
+          <a class="week-item" data-week-item="3" href="detail.html?id=traffic&from=home"><span class="week-item-date">9月3日</span><span class="week-item-copy"><strong>主要到店路线将出现运行变化</strong><span>交通 · 已确认</span></span><span class="week-item-arrow" aria-hidden="true">→</span></a>
+          <a class="week-item" data-week-item="5" href="detail.html?id=weekend&from=home"><span class="week-item-date">9月5日</span><span class="week-item-copy"><strong>周末公共活动将在城市会展区域举行</strong><span>活动 · 待阅</span></span><span class="week-item-arrow" aria-hidden="true">→</span></a>
+          <div class="week-empty" id="weekEmpty" hidden>这一天暂无已确认事项。</div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="newTitle">
+        <div class="section-head"><div><div class="section-kicker">今天先看</div><h2 id="newTitle">今日新增</h2></div><span class="section-count">2 件</span></div>
+        <div class="card-stack">
+          <article class="event-card">
+            <div class="card-top"><div class="tag-row"><span class="tag">活动</span><span class="tag status">已确认</span></div><span class="card-time">影响 9月2日</span></div>
+            <h3>大型公共活动将在附近场馆举行</h3>
+            <p class="fact-line"><strong>为什么与本店有关：</strong>活动时段可能影响周边住宿需求与住客到店交通。</p>
+            <ul class="check-list"><li>检查相关日期的房量与售价</li><li>查看住客主要到店路线</li></ul>
+            <div class="card-meta"><span class="meta-item"><i class="meta-dot"></i>来源机构：官方场馆</span><span class="meta-item">最近核验：今天 10:20</span></div>
+            <div class="card-actions"><button class="action primary" type="button" data-read>知道了</button><button class="action accent" type="button" data-follow>关注这件事</button><button class="action" type="button" data-remind>稍后提醒</button><button class="action" type="button" data-detail data-detail-id="activity">查看详情</button></div>
+          </article>
+          <article class="event-card">
+            <div class="card-top"><div class="tag-row"><span class="tag warning">天气</span><span class="tag changed">预警升级</span></div><span class="card-time">影响 72 小时</span></div>
+            <h3>当前区域发布强影响天气预警</h3>
+            <p class="fact-line"><strong>为什么与本店有关：</strong>预警有效期内可能影响住客到店、现场服务与安全准备。</p>
+            <div class="card-meta"><span class="meta-item"><i class="meta-dot warning"></i>来源机构：官方气象接口</span><span class="meta-item">最近核验：今天 09:50</span></div>
+            <div class="card-actions"><button class="action primary" type="button" data-read>知道了</button><button class="action" type="button" data-detail data-detail-id="weather">查看详情</button></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="unreadTitle">
+        <a class="unread-entry" id="unreadEntry" href="pending.html" aria-label="待阅事项，2 件">
+          <span class="unread-entry-copy"><strong id="unreadTitle">待阅事项</strong><span>2 件</span></span>
+          <span class="unread-entry-arrow" aria-hidden="true">→</span>
+        </a>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="主导航">
+      <button class="nav-button" type="button" aria-current="page" data-nav="brief"><span class="nav-icon">⌁</span><span>早报</span></button>
+      <button class="nav-button" type="button" data-nav="follow"><span class="nav-icon">○</span><span>关注</span></button>
+    </nav>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <div class="sheet-backdrop" id="sheetBackdrop" aria-hidden="true">
+    <section class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+      <div class="sheet-handle" aria-hidden="true"></div>
+      <h2 id="sheetTitle">操作</h2>
+      <p id="sheetDescription">原型演示</p>
+      <div class="sheet-options" id="sheetOptions"></div>
+      <button class="sheet-close" id="sheetClose" type="button">关闭</button>
+    </section>
+  </div>
+
+  <script>
+    const toast = document.querySelector('#toast');
+    const backdrop = document.querySelector('#sheetBackdrop');
+    const sheetTitle = document.querySelector('#sheetTitle');
+    const sheetDescription = document.querySelector('#sheetDescription');
+    const sheetOptions = document.querySelector('#sheetOptions');
+    let toastTimer;
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+    }
+
+    function closeSheet() {
+      backdrop.classList.remove('open');
+      backdrop.setAttribute('aria-hidden', 'true');
+      sheetOptions.innerHTML = '';
+    }
+
+    function openSheet(title, description, options) {
+      sheetTitle.textContent = title;
+      sheetDescription.textContent = description;
+      sheetOptions.innerHTML = '';
+      options.forEach((option) => {
+        const button = document.createElement('button');
+        button.className = 'sheet-option';
+        button.type = 'button';
+        button.innerHTML = `<span>${option.label}</span><small>${option.note || '原型演示'}</small>`;
+        button.addEventListener('click', () => {
+          if (option.action) option.action();
+          closeSheet();
+        });
+        sheetOptions.appendChild(button);
+      });
+      backdrop.classList.add('open');
+      backdrop.setAttribute('aria-hidden', 'false');
+    }
+
+    document.querySelector('#sheetClose').addEventListener('click', closeSheet);
+    backdrop.addEventListener('click', (event) => { if (event.target === backdrop) closeSheet(); });
+
+    const futureEntry = document.querySelector('#futureEntry');
+    const weekPanel = document.querySelector('#weekPanel');
+    const weekEmpty = document.querySelector('#weekEmpty');
+    const weekItems = [...document.querySelectorAll('[data-week-item]')];
+
+    function renderWeekDay(day) {
+      document.querySelectorAll('[data-week-day]').forEach((button) => button.setAttribute('aria-selected', button.dataset.weekDay === day ? 'true' : 'false'));
+      let visibleCount = 0;
+      weekItems.forEach((item) => {
+        const visible = item.dataset.weekItem === day;
+        item.hidden = !visible;
+        if (visible) visibleCount += 1;
+      });
+      weekEmpty.hidden = visibleCount > 0;
+    }
+
+    function openWeekPanel() {
+      weekPanel.hidden = false;
+      weekPanel.classList.add('open');
+      futureEntry.setAttribute('aria-expanded', 'true');
+      futureEntry.querySelector('span:last-child').innerHTML = '收起&nbsp;↑';
+      renderWeekDay('1');
+      weekPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function closeWeekPanel() {
+      weekPanel.classList.remove('open');
+      weekPanel.hidden = true;
+      futureEntry.setAttribute('aria-expanded', 'false');
+      futureEntry.querySelector('span:last-child').innerHTML = '查看&nbsp;→';
+    }
+
+    futureEntry.addEventListener('click', () => {
+      if (weekPanel.hidden) openWeekPanel();
+      else closeWeekPanel();
+    });
+    document.querySelector('#weekClose').addEventListener('click', closeWeekPanel);
+    document.querySelectorAll('[data-week-day]').forEach((button) => button.addEventListener('click', () => renderWeekDay(button.dataset.weekDay)));
+    renderWeekDay('1');
+
+    document.querySelectorAll('[data-remind]').forEach((button) => button.addEventListener('click', () => openSheet('稍后提醒', '只展示仍然有效的提醒选项。', [
+      { label: '事项发生前 1 天', note: '原型演示', action: () => showToast('已选择：事项发生前 1 天') },
+      { label: '事项发生前 3 天', note: '原型演示', action: () => showToast('已选择：事项发生前 3 天') },
+      { label: '自定义日期和时间', note: '原型演示', action: () => showToast('原型演示：打开日期时间选择') }
+    ])));
+
+    document.querySelectorAll('[data-read]').forEach((button) => button.addEventListener('click', () => {
+      button.classList.toggle('active');
+      button.textContent = button.classList.contains('active') ? '已阅' : '知道了';
+      showToast(button.classList.contains('active') ? '已标记为已阅；今日新增仍保留' : '已恢复为未阅演示状态');
+    }));
+
+    document.querySelectorAll('[data-follow]').forEach((button) => button.addEventListener('click', () => {
+      const active = button.classList.toggle('active');
+      localStorage.setItem('jr-follow-activity', active ? '1' : '0');
+      button.textContent = active ? '已关注' : '关注这件事';
+      showToast(active ? '已加入关注；完整列表请进入“关注”' : '已取消关注');
+    }));
+
+    document.querySelectorAll('[data-detail]').forEach((button) => button.addEventListener('click', () => {
+      location.href = `detail.html?id=${button.dataset.detailId || 'activity'}&from=home`;
+    }));
+
+    document.querySelectorAll('[data-nav]').forEach((button) => button.addEventListener('click', () => {
+      if (button.dataset.nav === 'brief') {
+        document.querySelectorAll('[data-nav]').forEach((item) => item.removeAttribute('aria-current'));
+        button.setAttribute('aria-current', 'page');
+        showToast('当前为早报首页');
+        return;
+      }
+      location.href = 'follow.html';
+    }));
+  </script>
+</body>
+</html>
