@@ -56,8 +56,44 @@
           "status": "needs-review"
         }
       ]
+    },
+    "index": {
+      "versions": [
+        {
+          "path": "index.html",
+          "createdAt": "2026-09-02T06:13:38.099Z",
+          "status": "needs-review"
+        }
+      ]
+    },
+    "pending": {
+      "versions": [
+        {
+          "path": "pending.html",
+          "createdAt": "2026-09-02T06:13:38.181Z",
+          "status": "needs-review"
+        }
+      ]
+    },
+    "follow": {
+      "versions": [
+        {
+          "path": "follow.html",
+          "createdAt": "2026-09-02T06:13:38.265Z",
+          "status": "needs-review"
+        }
+      ]
+    },
+    "detail": {
+      "versions": [
+        {
+          "path": "detail.html",
+          "createdAt": "2026-09-02T06:13:38.351Z",
+          "status": "needs-review"
+        }
+      ]
     }
   },
   "createdAt": "2026-09-02T04:21:28.291Z",
-  "updatedAt": "2026-09-02T04:44:21.004Z"
+  "updatedAt": "2026-09-02T06:13:38.352Z"
 }

@@ -66,6 +66,7 @@ h1 { margin: 6px 0 4px; font-size: 29px; line-height: 1.18; letter-spacing: -.04
 .tag-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 .tag { display: inline-flex; align-items: center; min-height: 24px; padding: 0 8px; border-radius: 999px; background: var(--jr-accent-soft); color: var(--jr-accent-dark); font-size: 11px; font-weight: 750; }
 .tag.warning { background: var(--jr-warning-soft); color: #815216; }
+.tag.policy { background: var(--jr-accent-soft); color: var(--jr-accent-dark); }
 .tag.info { background: var(--jr-info-soft); color: var(--jr-info); }
 .tag.status { background: var(--jr-success-soft); color: var(--jr-success); }
 .tag.changed { background: var(--jr-warning-soft); color: #815216; }
@@ -124,6 +125,12 @@ h1 { margin: 6px 0 4px; font-size: 29px; line-height: 1.18; letter-spacing: -.04
 .detail-actions { position: fixed; z-index: 4; right: 0; bottom: 0; left: 50%; width: min(100%, 430px); padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); transform: translateX(-50%); background: rgba(255, 255, 255, .96); border-top: 1px solid var(--jr-border); backdrop-filter: blur(16px); }
 .detail-actions .action-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
 .detail-actions .action { min-height: 38px; }
+.policy-block[hidden] { display: none; }
+.policy-block { border-color: #D7B59E; background: #FFFCF9; }
+.policy-reading { margin-top: 16px; padding-top: 14px; border-top: 1px solid #E8D8CB; }
+.policy-reading p { margin: 8px 0 0; color: var(--jr-text-secondary); font-size: 12px; line-height: 1.7; }
+.policy-uncertain { color: var(--jr-accent-dark) !important; }
+.policy-disclaimer { margin: 14px 0 0; color: var(--jr-text-muted); font-size: 11px; line-height: 1.6; }
 .toast { position: fixed; z-index: 20; left: 50%; bottom: 88px; transform: translate(-50%, 16px); padding: 9px 13px; border-radius: 10px; background: var(--jr-action); color: #fff; font-size: 12px; opacity: 0; pointer-events: none; transition: opacity .2s ease, transform .2s ease; }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
 .sheet-backdrop { position: fixed; z-index: 10; inset: 0; display: grid; align-items: end; background: rgba(37, 42, 48, .24); opacity: 0; pointer-events: none; transition: opacity .2s ease; }

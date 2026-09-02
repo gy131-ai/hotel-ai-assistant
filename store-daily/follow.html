@@ -21,12 +21,12 @@
     <main class="page-main">
       <section class="page-heading" aria-labelledby="followTitle">
         <div class="eyebrow">持续跟进</div>
-        <h1 id="followTitle">关注</h1>
+        <h1 id="followTitle">我的关注</h1>
         <p>管理已关注和待提醒事项</p>
       </section>
 
       <div class="tabs" role="tablist" aria-label="关注事项状态">
-        <button class="tab" id="tab-following" type="button" role="tab" aria-selected="true" aria-controls="panel-following" data-tab="following">关注中 <b data-count="following">1</b></button>
+        <button class="tab" id="tab-following" type="button" role="tab" aria-selected="true" aria-controls="panel-following" data-tab="following">关注中 <b data-count="following">2</b></button>
         <button class="tab" id="tab-reminding" type="button" role="tab" aria-selected="false" aria-controls="panel-reminding" data-tab="reminding">待提醒 <b data-count="reminding">1</b></button>
         <button class="tab" id="tab-cancelled" type="button" role="tab" aria-selected="false" aria-controls="panel-cancelled" data-tab="cancelled">已取消 <b data-count="cancelled">0</b></button>
         <button class="tab" id="tab-ended" type="button" role="tab" aria-selected="false" aria-controls="panel-ended" data-tab="ended">已结束 <b data-count="ended">0</b></button>
@@ -40,6 +40,13 @@
           <p class="fact-line"><strong>关注原因：</strong>活动时段可能影响周边住宿需求与住客到店交通。</p>
           <div class="card-meta"><span>来源机构：官方场馆</span><span>最近核验：今天 10:20</span></div>
           <div class="card-actions"><button class="action" type="button" data-action="unfollow">取消关注</button><a class="action primary" href="detail.html?id=activity&from=follow">查看详情</a><button class="action" type="button" data-action="copy">复制文案</button></div>
+        </article>
+        <article class="follow-card" data-follow-card="policy">
+          <div class="card-top"><div class="tag-row"><span class="tag policy">政策</span><span class="tag changed">新发布</span></div><span class="card-time">生效 9月5日</span></div>
+          <h2>住宿业服务规范更新（原型演示）</h2>
+          <p class="fact-line"><strong>关注原因：</strong>示例政策适用于本市住宿经营主体，关键生效条件仍需进一步确认。</p>
+          <div class="card-meta"><span>示例来源：市文旅部门</span><span>最近核验：今天 11:10</span></div>
+          <div class="card-actions"><button class="action" type="button" data-action="unfollow">取消关注</button><a class="action primary" href="detail.html?id=policy&from=follow">查看详情</a><button class="action" type="button" data-action="copy">复制文案</button></div>
         </article>
         <div class="empty-state" data-empty="following" hidden><strong>暂无关注中的事项</strong><span>在事项详情中关注后，会显示在这里。</span></div>
       </section>
@@ -88,7 +95,6 @@
     const sheetTitle = document.querySelector('#sheetTitle');
     const sheetDescription = document.querySelector('#sheetDescription');
     const sheetOptions = document.querySelector('#sheetOptions');
-    const followingCard = document.querySelector('[data-follow-card="activity"]');
     const followingEmpty = document.querySelector('[data-empty="following"]');
     let toastTimer;
     let reminderActive = true;
@@ -100,8 +106,9 @@
       toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
     }
 
-    function copyText() {
-      const text = '大型公共活动将在附近场馆举行。影响 9月2日，可能影响周边住宿需求与住客到店交通。来源机构：官方场馆。最近核验：今天 10:20。';
+    function copyText(event) {
+      const card = event.currentTarget.closest('[data-follow-card]');
+      const text = `${card.querySelector('h2').textContent}。原型演示文案。`;
       if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).catch(() => {});
       showToast('已复制事项文案');
     }
@@ -129,10 +136,16 @@
     }
 
     function updateFollowingState() {
-      const active = localStorage.getItem('jr-follow-activity') !== '0';
-      followingCard.hidden = !active;
-      followingEmpty.hidden = active;
-      document.querySelector('[data-count="following"]').textContent = active ? '1' : '0';
+      const cards = [...document.querySelectorAll('[data-follow-card]')];
+      let activeCount = 0;
+      cards.forEach((card) => {
+        const id = card.dataset.followCard;
+        const active = localStorage.getItem(`jr-follow-${id}`) !== '0';
+        card.hidden = !active;
+        if (active) activeCount += 1;
+      });
+      followingEmpty.hidden = activeCount > 0;
+      document.querySelector('[data-count="following"]').textContent = String(activeCount);
     }
 
     document.querySelectorAll('[data-tab]').forEach((tab) => tab.addEventListener('click', () => {
@@ -140,11 +153,12 @@
       document.querySelectorAll('[data-panel]').forEach((panel) => { panel.hidden = panel.dataset.panel !== tab.dataset.tab; });
     }));
 
-    document.querySelector('[data-action="unfollow"]').addEventListener('click', () => {
-      localStorage.removeItem('jr-follow-activity');
+    document.querySelectorAll('[data-follow-card] [data-action="unfollow"]').forEach((button) => button.addEventListener('click', (event) => {
+      const card = event.currentTarget.closest('[data-follow-card]');
+      localStorage.setItem(`jr-follow-${card.dataset.followCard}`, '0');
       updateFollowingState();
       showToast('已取消关注');
-    });
+    }));
     document.querySelector('[data-action="edit-reminder"]').addEventListener('click', openReminderSheet);
     document.querySelector('[data-action="cancel-reminder"]').addEventListener('click', () => {
       reminderActive = false;

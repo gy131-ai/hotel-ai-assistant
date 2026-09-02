@@ -41,6 +41,27 @@
         </dl>
       </section>
 
+      <section class="detail-block policy-block" id="policySection" aria-labelledby="policyTitle" hidden>
+        <div class="section-label">政策信息</div>
+        <h2 id="policyTitle">政策事实</h2>
+        <dl class="detail-grid">
+          <div class="detail-row"><dt>发文机关</dt><dd id="policyAuthority"></dd></div>
+          <div class="detail-row"><dt>文号</dt><dd id="policyDocumentNo" class="muted"></dd></div>
+          <div class="detail-row"><dt>发布日期</dt><dd id="policyPublishedDate"></dd></div>
+          <div class="detail-row"><dt>生效日期</dt><dd id="policyEffectiveDate"></dd></div>
+          <div class="detail-row"><dt>申报/过渡</dt><dd id="policyDeadline"></dd></div>
+          <div class="detail-row"><dt>适用区域</dt><dd id="policyArea"></dd></div>
+          <div class="detail-row"><dt>适用对象</dt><dd id="policyEntities"></dd></div>
+          <div class="detail-row"><dt>政策状态</dt><dd id="policyStatus"></dd></div>
+        </dl>
+        <div class="policy-reading" aria-labelledby="policyReadingTitle">
+          <div class="section-label" id="policyReadingTitle">系统通俗解读</div>
+          <p id="policyInterpretation"></p>
+          <p class="policy-uncertain" id="policyUncertain" hidden>需进一步确认：请向主管部门或专业人员核对适用条件和执行口径。</p>
+        </div>
+        <p class="policy-disclaimer">本解读用于经营信息参考，不构成法律或专业意见。</p>
+      </section>
+
       <section class="detail-block" aria-labelledby="checkTitle">
         <div class="section-label">线下判断</div>
         <h2 id="checkTitle">建议检查</h2>
@@ -106,6 +127,9 @@
       },
       weekend: {
         type: '活动', typeClass: '', status: '待阅', statusClass: 'info', impact: '影响 9月5日', title: '周末公共活动将在城市会展区域举行', summary: '活动时间、周边交通和住客到店提示需要提前查看。', fact: '周末公共活动将在城市会展区域举行，当前日期已确认。', date: '9月5日', time: '影响时段待确认', place: '城市会展区域', relation: '活动时段可能影响周边交通与住客到店提示。', source: '主办方官方', published: '昨天 13:50', checked: '昨天 14:15', checks: ['查看活动时间与周边交通', '准备住客到店提示'], timeline: ['昨天 14:15｜系统完成最近一次核验，事项状态为已确认。']
+      },
+      policy: {
+        type: '政策', typeClass: '', status: '新发布', statusClass: 'changed', impact: '生效 9月5日', title: '住宿业服务规范更新（原型演示）', summary: '示例政策可能影响本市住宿经营主体的服务准备，适用条件仍需进一步确认。', fact: '示例政策由市文旅部门发布，面向本市住宿经营主体；本条内容仅用于展示政策事项详情结构。', date: '9月5日生效', time: '生效日期明确；执行口径待确认', place: '本市住宿经营区域', relation: '适用区域和经营主体与当前酒店资料存在匹配，仍需核对具体经营条件。', source: '市文旅部门（原型演示）', published: '今天 10:50', checked: '今天 11:10', checks: ['核对酒店经营主体及适用区域', '确认9月5日生效前需要准备的资料'], timeline: ['今天 11:10｜政策事实与系统通俗解读完成人工审核（原型演示）。'], policy: { authority: '市文旅部门（原型演示）', documentNo: '文号待补（原型演示）', publishedDate: '2026年9月1日', effectiveDate: '2026年9月5日', deadline: '申报/过渡节点待确认', area: '本市', entities: '住宿经营主体', status: '新发布', interpretation: '这项示例政策主要更新住宿业服务规范。当前酒店可以先核对经营主体、适用区域和内部服务资料，再根据正式执行口径决定是否需要进一步准备。', uncertain: true }
       }
     };
     const params = new URLSearchParams(location.search);
@@ -149,7 +173,8 @@
     }
 
     function copyText() {
-      const text = `${detail.title}。${detail.summary}影响日期：${detail.date}。来源机构：${detail.source}。最近核验：${detail.checked}。`;
+      const policyNotice = detail.policy ? '本解读用于经营信息参考，不构成法律或专业意见。' : '';
+      const text = `${detail.title}。${detail.summary}影响日期：${detail.date}。来源机构：${detail.source}。最近核验：${detail.checked}。${policyNotice}`;
       if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).catch(() => {});
       showToast('已复制事项文案');
     }
@@ -168,9 +193,23 @@
       document.querySelector('#sourceChecked').textContent = detail.checked;
       document.querySelector('#checkList').innerHTML = detail.checks.map((item) => `<li>${item}</li>`).join('');
       document.querySelector('#timelineList').innerHTML = detail.timeline.map((item) => { const parts = item.split('｜'); return `<li><time>${parts[0]}</time><span>${parts[1]}</span></li>`; }).join('');
+      const policySection = document.querySelector('#policySection');
+      policySection.hidden = !detail.policy;
+      if (detail.policy) {
+        document.querySelector('#policyAuthority').textContent = detail.policy.authority;
+        document.querySelector('#policyDocumentNo').textContent = detail.policy.documentNo;
+        document.querySelector('#policyPublishedDate').textContent = detail.policy.publishedDate;
+        document.querySelector('#policyEffectiveDate').textContent = detail.policy.effectiveDate;
+        document.querySelector('#policyDeadline').textContent = detail.policy.deadline;
+        document.querySelector('#policyArea').textContent = detail.policy.area;
+        document.querySelector('#policyEntities').textContent = detail.policy.entities;
+        document.querySelector('#policyStatus').textContent = detail.policy.status;
+        document.querySelector('#policyInterpretation').textContent = detail.policy.interpretation;
+        document.querySelector('#policyUncertain').hidden = !detail.policy.uncertain;
+      }
       document.querySelector('#backLink').href = sourcePage;
       document.title = `店长日报｜${detail.title}`;
-      if (detailId === 'activity' && localStorage.getItem('jr-follow-activity') === '1') {
+      if (localStorage.getItem(`jr-follow-${detailId}`) === '1') {
         document.querySelector('#followButton').classList.add('active');
         document.querySelector('#followButton').textContent = '已关注';
       }
@@ -185,7 +224,7 @@
     document.querySelector('#followButton').addEventListener('click', (event) => {
       const button = event.currentTarget;
       const active = button.classList.toggle('active');
-      if (detailId === 'activity') localStorage.setItem('jr-follow-activity', active ? '1' : '0');
+      localStorage.setItem(`jr-follow-${detailId}`, active ? '1' : '0');
       button.textContent = active ? '已关注' : '关注这件事';
       showToast(active ? '已加入关注' : '已取消关注');
     });
@@ -198,16 +237,25 @@
     document.querySelectorAll('[data-feedback]').forEach((button) => button.addEventListener('click', () => {
       const type = button.dataset.feedback;
       if (type === 'useful') showToast('感谢反馈');
-      if (type === 'irrelevant') openSheet('为什么不相关', '选择一个原因，帮助调整后续推荐。', [
-        { label: '距离或影响范围不相关', action: () => showToast('已提交不相关反馈') },
-        { label: '活动规模太小', action: () => showToast('已提交不相关反馈') },
-        { label: '与本店客群不匹配', action: () => showToast('已提交不相关反馈') },
-        { label: '其他原因', action: () => showToast('已提交不相关反馈') }
-      ]);
+      if (type === 'irrelevant') {
+        const options = detailId === 'policy' ? [
+          { label: '政策适用区域不匹配', action: () => showToast('已提交不相关反馈') },
+          { label: '政策适用对象不匹配', action: () => showToast('已提交不相关反馈') },
+          { label: '经营条件不匹配', action: () => showToast('已提交不相关反馈') },
+          { label: '其他原因', action: () => showToast('已提交不相关反馈') }
+        ] : [
+          { label: '距离或影响范围不相关', action: () => showToast('已提交不相关反馈') },
+          { label: '活动规模太小', action: () => showToast('已提交不相关反馈') },
+          { label: '与本店客群不匹配', action: () => showToast('已提交不相关反馈') },
+          { label: '其他原因', action: () => showToast('已提交不相关反馈') }
+        ];
+        openSheet('为什么不相关', '选择一个原因，帮助调整后续推荐。', options);
+      }
       if (type === 'problem') openSheet('反馈信息问题', '选择需要核查的事实问题。', [
         { label: '时间或地点错误', action: () => showToast('已提交信息问题') },
         { label: '信息已过期', action: () => showToast('已提交信息问题') },
         { label: '活动已经取消', action: () => showToast('已提交信息问题') },
+        ...(detailId === 'policy' ? [{ label: '政策适用对象、关键日期或解读有误', action: () => showToast('已提交信息问题') }] : []),
         { label: '其他事实问题', action: () => showToast('已提交信息问题') }
       ]);
     }));
