@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="description" content="店长日报首页设计预览">
-  <title>店长日报｜早报首页设计 V1.0</title>
+  <title>店长日报｜早报首页设计 V1.1</title>
   <style>
     :root {
       --jr-bg: #F6F5F2;
@@ -33,9 +33,10 @@
     }
     * { box-sizing: border-box; }
     html { background: #D8D5CF; }
-    body { margin: 0; background: #D8D5CF; color: var(--jr-text); font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Noto Sans SC", sans-serif; line-height: 1.6; }
+    body { margin: 0; min-height: 100vh; overflow: hidden; background: #D8D5CF; color: var(--jr-text); font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Noto Sans SC", sans-serif; line-height: 1.6; }
     button { font: inherit; }
-    .phone { width: min(100%, 430px); min-height: 100vh; margin: 0 auto; background: var(--jr-bg); box-shadow: var(--shadow); position: relative; overflow: hidden; }
+    .phone { width: min(100%, 430px); height: min(844px, 100vh); min-height: 0; margin: 0 auto; background: var(--jr-bg); box-shadow: var(--shadow); position: relative; overflow-x: hidden; overflow-y: auto; scrollbar-width: none; overscroll-behavior: contain; }
+    .phone::-webkit-scrollbar { width: 0; height: 0; }
     .topbar { position: sticky; top: 0; z-index: 4; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: calc(14px + env(safe-area-inset-top)) 20px 13px; background: rgba(246, 245, 242, .92); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(223, 222, 217, .72); }
     .brand { display: flex; align-items: center; gap: 9px; min-width: 0; }
     .brand-mark { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; background: var(--jr-action); color: #fff; }
@@ -145,7 +146,7 @@
     .unread-entry-copy strong { font-size: 14px; }
     .unread-entry-copy span { color: var(--jr-text-muted); font-size: 12px; }
     .unread-entry-arrow { color: var(--jr-accent-dark); font-size: 21px; line-height: 1; }
-    .bottom-nav { position: absolute; z-index: 5; right: 0; bottom: 0; left: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 10px 18px calc(10px + env(safe-area-inset-bottom)); background: rgba(255, 255, 255, .94); border-top: 1px solid var(--jr-border); backdrop-filter: blur(16px); }
+    .bottom-nav { position: fixed; z-index: 5; right: auto; bottom: 0; left: 50%; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; width: min(100%, 430px); padding: 10px 18px calc(10px + env(safe-area-inset-bottom)); transform: translateX(-50%); background: rgba(255, 255, 255, .94); border-top: 1px solid var(--jr-border); backdrop-filter: blur(16px); }
     .nav-button { display: grid; justify-items: center; gap: 3px; min-height: 44px; border: 0; background: transparent; color: var(--jr-text-muted); cursor: pointer; font-size: 11px; }
     .nav-button[aria-current="page"] { color: var(--jr-accent-dark); font-weight: 750; }
     .nav-icon { display: grid; place-items: center; width: 25px; height: 25px; border-radius: 9px; font-size: 16px; line-height: 1; }
@@ -163,7 +164,7 @@
     .sheet-option { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 46px; padding: 0 13px; border: 1px solid var(--jr-border); border-radius: 11px; background: var(--jr-surface); color: var(--jr-text); text-align: left; cursor: pointer; }
     .sheet-option small { color: var(--jr-text-muted); }
     .sheet-close { width: 100%; min-height: 42px; margin-top: 12px; border: 0; border-radius: 10px; background: var(--jr-bg); color: var(--jr-text-secondary); cursor: pointer; }
-    @media (min-width: 700px) { body { padding: 24px 0; } .phone { min-height: calc(100vh - 48px); border-radius: 26px; } .topbar { border-radius: 26px 26px 0 0; } }
+    @media (min-width: 700px) { body { padding: 24px 0; } .phone { height: min(844px, calc(100vh - 48px)); border-radius: 26px; } .topbar { border-radius: 26px 26px 0 0; } .bottom-nav { bottom: 24px; border-radius: 0 0 26px 26px; } }
   </style>
 </head>
 <body>

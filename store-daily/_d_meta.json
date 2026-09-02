@@ -47,8 +47,17 @@
           "status": "needs-review"
         }
       ]
+    },
+    "店长日报固定手机首页": {
+      "versions": [
+        {
+          "path": "index.html",
+          "createdAt": "2026-09-02T04:44:21.003Z",
+          "status": "needs-review"
+        }
+      ]
     }
   },
   "createdAt": "2026-09-02T04:21:28.291Z",
-  "updatedAt": "2026-09-02T04:21:28.600Z"
+  "updatedAt": "2026-09-02T04:44:21.004Z"
 }
